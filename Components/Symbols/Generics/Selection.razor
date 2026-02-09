@@ -1,0 +1,24 @@
+<div class="selection-container @(IsSelected ? "selected" : "")" style="@Style" @onclick="OnClick">
+    @ChildContent
+</div>
+
+<style>
+    .selection-container {
+        display: inline-block;
+        position: relative;
+        padding: 2px;
+        cursor: pointer;
+    }
+
+    .selection-container.selected {
+        outline: 2px solid blue;
+        box-shadow: 0 0 5px blue;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+}

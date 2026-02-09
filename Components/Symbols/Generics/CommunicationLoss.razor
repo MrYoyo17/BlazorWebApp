@@ -1,0 +1,41 @@
+@using TestBlazor.Components.Symbols.Common
+
+<div class="comm-loss-container">
+    <div class="comm-loss-wrapper">
+        @ChildContent
+    </div>
+
+    @if (HasCommLoss)
+    {
+        <div class="comm-loss-icon">
+            <CommLossIcon />
+        </div>
+    }
+</div>
+
+<style>
+    .comm-loss-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .comm-loss-wrapper {
+        display: inline-block;
+    }
+
+    .comm-loss-icon {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        z-index: 10;
+        background: white;
+        border-radius: 50%;
+        padding: 2px;
+        border: 1px solid red;
+    }
+</style>
+
+@code {
+    [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

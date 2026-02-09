@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfToDoTemplate xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ToDoTemplate>
+    <Id>b67fa75f-97ed-4e24-ace3-22a155c2b0f8</Id>
+    <Name>Daily Inspection</Name>
+    <Description>Routine checks for the facility.</Description>
+    <Items>
+      <ToDoItem>
+        <Id>1f4ff96f-d752-47b2-929f-5b260e26d242</Id>
+        <Description>Check water levels</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>fd03f7cb-072b-48c7-8aa2-7f2b9d199426</Id>
+        <Description>Inspect turbine casing</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>a612c1bc-9caf-4cd1-a494-80aed264307c</Id>
+        <Description>Verify valve positions</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>4d13bc9d-145b-4a51-bd8c-6e35c1e517ae</Id>
+        <Description>Record outgoing pressure</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+    </Items>
+  </ToDoTemplate>
+  <ToDoTemplate>
+    <Id>dde7c70e-5e5f-4875-ae32-83cf44e2ccf5</Id>
+    <Name>Emergency Shutdown</Name>
+    <Description>Steps to follow in case of emergency.</Description>
+    <Items>
+      <ToDoItem>
+        <Id>a33d7918-413d-44fd-9e49-c47a1c7cf23d</Id>
+        <Description>Activate emergency siren</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>711ae84a-44c0-42e2-8e07-210d47520c7e</Id>
+        <Description>Close main intake valve</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>726f447f-57aa-4de1-a5b1-4e1c3d70b8b8</Id>
+        <Description>Notify control center</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+    </Items>
+  </ToDoTemplate>
+  <ToDoTemplate>
+    <Id>8c40a62e-658d-423b-b674-94a428f05a55</Id>
+    <Name>Maintenance Random</Name>
+    <Description>Randomly generated maintenance tasks.</Description>
+    <Items>
+      <ToDoItem>
+        <Id>81519506-ce4a-4d06-9dff-d7c8d323871b</Id>
+        <Description>Clean filters</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+      <ToDoItem>
+        <Id>ee0f6f69-9507-4c13-a974-acf50193220f</Id>
+        <Description>Oil bearings</Description>
+        <IsChecked>false</IsChecked>
+      </ToDoItem>
+    </Items>
+  </ToDoTemplate>
+</ArrayOfToDoTemplate>

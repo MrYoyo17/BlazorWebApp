@@ -1,0 +1,38 @@
+@using TestBlazor.Components.Symbols.Common
+
+<div class="settings-container @(IsVisible ? "visible" : "")" @onclick="OnSettingsClickInternal" @onclick:stopPropagation="true">
+    <GearIcon />
+</div>
+
+<style>
+    .settings-container {
+        position: absolute;
+        top: 0;
+        right: 0;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        padding: 2px;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none; /* Ignore clicks when hidden */
+    }
+
+    .settings-container.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private async Task OnSettingsClickInternal(MouseEventArgs e)
+    {
+        if (OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
+}

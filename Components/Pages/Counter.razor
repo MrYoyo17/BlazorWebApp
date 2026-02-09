@@ -1,6 +1,11 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
 
+@using TestBlazor.Services
+@using TestBlazor.Components.Symbols
+@inject CompassService CompassService
+@implements IDisposable
+
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
@@ -9,11 +14,59 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+<hr />
+
+<h2>Compass Control</h2>
+<div class="row">
+    <div class="col-md-6">
+        <label>Heading: @CompassService.Heading°</label>
+        <input type="range" class="form-range" min="0" max="360" value="@CompassService.Heading" @oninput="UpdateHeading" />
+        
+        <div class="btn-group mt-2">
+            <button class="btn btn-secondary" @onclick="() => AdjustHeading(-10)">-10°</button>
+            <button class="btn btn-secondary" @onclick="() => AdjustHeading(10)">+10°</button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div style="width: 150px; height: 150px;">
+            <Compass />
+        </div>
+    </div>
+</div>
+
 @code {
     private int currentCount = 0;
+
+    protected override void OnInitialized()
+    {
+        CompassService.OnChange += OnCompassChange;
+    }
+
+    public void Dispose()
+    {
+        CompassService.OnChange -= OnCompassChange;
+    }
+
+    private async void OnCompassChange()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
 
     private void IncrementCount()
     {
         currentCount++;
+    }
+
+    private void UpdateHeading(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int val))
+        {
+            CompassService.SetHeading(val);
+        }
+    }
+
+    private void AdjustHeading(int delta)
+    {
+        CompassService.SetHeading(CompassService.Heading + delta);
     }
 }

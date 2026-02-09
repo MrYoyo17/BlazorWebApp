@@ -1,0 +1,30 @@
+<div class="overlay-container">
+    @ChildContent
+    <div class="overlay-content">
+        @OverlayContent
+    </div>
+</div>
+
+<style>
+    .overlay-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .overlay-content {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none; /* Let clicks pass through to the symbol */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? OverlayContent { get; set; }
+}

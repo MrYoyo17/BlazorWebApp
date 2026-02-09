@@ -1,0 +1,29 @@
+<div class="mouseover-container" @onmouseenter="OnMouseEnter" @onmouseleave="OnMouseLeave">
+    @if (ChildContent != null)
+    {
+        @ChildContent(IsOver)
+    }
+</div>
+
+<style>
+    .mouseover-container {
+        display: inline-block;
+        position: relative;
+    }
+</style>
+
+@code {
+    [Parameter] public RenderFragment<bool>? ChildContent { get; set; }
+
+    private bool IsOver { get; set; }
+
+    private void OnMouseEnter()
+    {
+        IsOver = true;
+    }
+
+    private void OnMouseLeave()
+    {
+        IsOver = false;
+    }
+}

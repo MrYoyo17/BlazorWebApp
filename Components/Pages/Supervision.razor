@@ -1,0 +1,175 @@
+@page "/supervision"
+@using TestBlazor.Components.Symbols
+@using TestBlazor.Components.Symbols.Generics
+@rendermode InteractiveServer
+
+<PageTitle>Supervision</PageTitle>
+
+<h1>Supervision Barrage Hydraulique</h1>
+
+<div class="controls mb-4">
+    <div class="card p-3">
+        <h4>Control Panel</h4>
+        <div class="d-flex gap-3 align-items-center">
+            <div>
+                <strong>Selected:</strong> @(SelectedId ?? "None")
+            </div>
+            <button class="btn btn-primary" @onclick="ToggleOverlay" disabled="@(SelectedId == null)">Toggle Overlay</button>
+            <button class="btn btn-secondary" @onclick="ToggleEnable" disabled="@(SelectedId == null)">Toggle Enable</button>
+            <button class="btn btn-danger" @onclick="ToggleCommLoss" disabled="@(SelectedId == null)">Toggle Comm Loss</button>
+        </div>
+    </div>
+</div>
+
+<div class="supervision-grid">
+    <div class="symbol-group">
+        <h3>Pumps</h3>
+        <Pump IsSelected="@(SelectedId == "pump1")" IsEnabled="@IsEnable("pump1")" HasCommLoss="@HasCommLoss("pump1")" OnClick="@(() => Select("pump1"))" OnSettingsClick="@(() => OpenSettings("pump1"))" OverlayContent="@GetOverlay("pump1")" />
+        <Pump Size="150" Rotation="45" IsSelected="@(SelectedId == "pump2")" IsEnabled="@IsEnable("pump2")" HasCommLoss="@HasCommLoss("pump2")" OnClick="@(() => Select("pump2"))" OnSettingsClick="@(() => OpenSettings("pump2"))" OverlayContent="@GetOverlay("pump2")" />
+    </div>
+
+    <div class="symbol-group">
+        <h3>Valves</h3>
+        <Valve IsSelected="@(SelectedId == "valve1")" IsEnabled="@IsEnable("valve1")" HasCommLoss="@HasCommLoss("valve1")" OnClick="@(() => Select("valve1"))" OnSettingsClick="@(() => OpenSettings("valve1"))" OverlayContent="@GetOverlay("valve1")" />
+        <Valve Size="80" IsSelected="@(SelectedId == "valve2")" IsEnabled="@IsEnable("valve2")" HasCommLoss="@HasCommLoss("valve2")" OnClick="@(() => Select("valve2"))" OnSettingsClick="@(() => OpenSettings("valve2"))" OverlayContent="@GetOverlay("valve2")" />
+    </div>
+
+    <div class="symbol-group">
+        <h3>Motors</h3>
+        <Moteur IsSelected="@(SelectedId == "motor1")" IsEnabled="@IsEnable("motor1")" HasCommLoss="@HasCommLoss("motor1")" OnClick="@(() => Select("motor1"))" OnSettingsClick="@(() => OpenSettings("motor1"))" OverlayContent="@GetOverlay("motor1")" />
+        <Moteur Rotation="90" IsSelected="@(SelectedId == "motor2")" IsEnabled="@IsEnable("motor2")" HasCommLoss="@HasCommLoss("motor2")" OnClick="@(() => Select("motor2"))" OnSettingsClick="@(() => OpenSettings("motor2"))" OverlayContent="@GetOverlay("motor2")" />
+    </div>
+
+    <div class="symbol-group">
+        <h3>Fans</h3>
+        <Fan IsSelected="@(SelectedId == "fan1")" IsEnabled="@IsEnable("fan1")" HasCommLoss="@HasCommLoss("fan1")" OnClick="@(() => Select("fan1"))" OnSettingsClick="@(() => OpenSettings("fan1"))" OverlayContent="@GetOverlay("fan1")" />
+        <Fan Size="120" Rotation="-45" IsSelected="@(SelectedId == "fan2")" IsEnabled="@IsEnable("fan2")" HasCommLoss="@HasCommLoss("fan2")" OnClick="@(() => Select("fan2"))" OnSettingsClick="@(() => OpenSettings("fan2"))" OverlayContent="@GetOverlay("fan2")" />
+    </div>
+
+    <div class="symbol-group">
+        <h3>Compass</h3>
+        <div style="width: 120px; height: 120px;">
+            <Compass />
+        </div>
+    </div>
+</div>
+
+<ConfirmationModal IsVisible="@IsModalVisible" Title="Settings Confirmation" Message="@($"Are you sure you want to configure {TargetSettingsId}?")" OnConfirm="@OnConfirmSettings" OnCancel="@OnCancelSettings" />
+
+<style>
+    .supervision-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .symbol-group {
+        border: 1px solid #ccc;
+        padding: 20px;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .overlay-text {
+        background-color: rgba(255, 255, 0, 0.7);
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-weight: bold;
+    }
+</style>
+
+@code {
+    private string? SelectedId { get; set; }
+    private HashSet<string> DisabledIds { get; set; } = new();
+    private HashSet<string> OverlayIds { get; set; } = new();
+    private HashSet<string> CommLossIds { get; set; } = new();
+
+    private bool IsModalVisible { get; set; }
+    private string? TargetSettingsId { get; set; }
+
+    private void Select(string id)
+    {
+        SelectedId = id;
+    }
+
+    private bool IsEnable(string id) => !DisabledIds.Contains(id);
+
+    private bool HasCommLoss(string id) => CommLossIds.Contains(id);
+
+    private RenderFragment? GetOverlay(string id)
+    {
+        if (OverlayIds.Contains(id))
+        {
+            return @<div class="overlay-text">Info</div>;
+        }
+        return null;
+    }
+
+    private void ToggleOverlay()
+    {
+        if (SelectedId != null)
+        {
+            if (OverlayIds.Contains(SelectedId))
+            {
+                OverlayIds.Remove(SelectedId);
+            }
+            else
+            {
+                OverlayIds.Add(SelectedId);
+            }
+        }
+    }
+
+    private void ToggleEnable()
+    {
+        if (SelectedId != null)
+        {
+            if (DisabledIds.Contains(SelectedId))
+            {
+                DisabledIds.Remove(SelectedId);
+            }
+            else
+            {
+                DisabledIds.Add(SelectedId);
+            }
+        }
+    }
+
+    private void ToggleCommLoss()
+    {
+        if (SelectedId != null)
+        {
+            if (CommLossIds.Contains(SelectedId))
+            {
+                CommLossIds.Remove(SelectedId);
+            }
+            else
+            {
+                CommLossIds.Add(SelectedId);
+            }
+        }
+    }
+
+    private void OpenSettings(string id)
+    {
+        TargetSettingsId = id;
+        IsModalVisible = true;
+    }
+
+    private void OnConfirmSettings()
+    {
+        // Logic for confirmation can be added here
+        Console.WriteLine($"Settings confirmed for {TargetSettingsId}");
+        IsModalVisible = false;
+        TargetSettingsId = null;
+    }
+
+    private void OnCancelSettings()
+    {
+        IsModalVisible = false;
+        TargetSettingsId = null;
+    }
+}

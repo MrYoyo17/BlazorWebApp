@@ -1,0 +1,21 @@
+<div class="enable-container @(IsEnabled ? "" : "disabled")">
+    @ChildContent
+</div>
+
+<style>
+    .enable-container {
+        display: inline-block;
+        transition: opacity 0.3s;
+    }
+
+    .enable-container.disabled {
+        opacity: 0.5;
+        filter: grayscale(100%);
+        pointer-events: none;
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsEnabled { get; set; } = true;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

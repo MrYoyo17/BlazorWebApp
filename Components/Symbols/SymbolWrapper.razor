@@ -1,0 +1,62 @@
+@using TestBlazor.Components.Symbols.Generics
+@using TestBlazor.Components.Symbols.Common
+
+<Selection IsSelected="@IsSelected" Style="@GetContainerStyle()" OnClick="OnClick">
+    <MouseOver Context="isOver">
+        <CommunicationLoss HasCommLoss="@HasCommLoss">
+            <div style="@GetContentStyle()">
+                <Enable IsEnabled="@IsEnabled">
+                    <Overlay OverlayContent="@OverlayContent">
+                        @ChildContent
+                    </Overlay>
+                </Enable>
+            </div>
+            
+            <Settings IsVisible="@isOver" OnClick="@OnSettingsClick" />
+        </CommunicationLoss>
+    </MouseOver>
+</Selection>
+
+<style>
+    /* Ensure generic wrappers fill the selection container */
+    ::deep .mouseover-container, 
+    ::deep .comm-loss-container, 
+    ::deep .comm-loss-wrapper {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+@code {
+    // Paramètres d'état visuel du symbole
+    [Parameter] public bool IsSelected { get; set; }
+    [Parameter] public bool IsEnabled { get; set; } = true;
+    [Parameter] public bool HasCommLoss { get; set; }
+    
+    // Paramètres de dimensionnement et rotation
+    [Parameter] public int Size { get; set; } = 100;
+    [Parameter] public int Rotation { get; set; } = 0;
+    
+    // RenderFragments : permettent d'injecter du contenu HTML/Razor depuis le composant parent.
+    // OverlayContent est affiché par-dessus le symbole (ex: infos tooltips).
+    [Parameter] public RenderFragment? OverlayContent { get; set; }
+    // ChildContent est le contenu principal du wrapper (l'icône SVG du symbole spécifique).
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    
+    // EventCallback : permet de communiquer des événements vers le parent (ex: clic).
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [Parameter] public EventCallback OnSettingsClick { get; set; }
+
+    // Génère le style du conteneur principal (taille fixe).
+    private string GetContainerStyle()
+    {
+        return $"width: {Size}px; height: {Size}px;";
+    }
+
+    // Génère le style du contenu rotatif.
+    // La rotation est appliquée ici pour ne tourner QUE l'icône, pas les indicateurs (Settings, CommLoss).
+    private string GetContentStyle()
+    {
+        return $"width: 100%; height: 100%; transform: rotate({Rotation}deg); transform-origin: center;";
+    }
+}
