@@ -2,6 +2,7 @@
 @using TestBlazor.Components.Symbols.Generics
 
 <SymbolWrapper IsSelected="IsSelected" IsEnabled="IsEnabled" HasCommLoss="HasCommLoss" HasCrossFilter="HasCrossFilter"
+               AlarmState="AlarmState" AlarmBlink="AlarmBlink"
                Width="Width" Height="Height" Rotation="Rotation" MirrorX="MirrorX" MirrorY="MirrorY"
                OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
     <div class="input-symbol-container">
@@ -54,6 +55,8 @@
     [Parameter] public bool IsEnabled { get; set; } = true;
     [Parameter] public bool HasCommLoss { get; set; }
     [Parameter] public bool HasCrossFilter { get; set; }
+    [Parameter] public int AlarmState { get; set; }
+    [Parameter] public bool AlarmBlink { get; set; }
     
     [Parameter] public int Width { get; set; } = 100;
     [Parameter] public int Height { get; set; } = 80;

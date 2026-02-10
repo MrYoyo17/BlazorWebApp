@@ -1,0 +1,57 @@
+<div class="alarm-container @GetAlarmClass()">
+    @ChildContent
+</div>
+
+<style>
+    .alarm-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .alarm-warning {
+        background-color: rgba(255, 255, 0, 0.5); /* Semi-transparent Yellow */
+    }
+
+    .alarm-error {
+        background-color: rgba(255, 0, 0, 0.5); /* Semi-transparent Red */
+    }
+
+    .alarm-blink {
+        animation: blink-animation 1s infinite;
+    }
+
+    @@keyframes blink-animation {
+        0% { opacity: 1; }
+        50% { opacity: 0.3; }
+        100% { opacity: 1; }
+    }
+</style>
+
+@code {
+    [Parameter] public int State { get; set; } // 0=None, 1=Warning, 2=Error
+    [Parameter] public bool IsBlinking { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string GetAlarmClass()
+    {
+        var classes = new List<string>();
+        
+        switch (State)
+        {
+            case 1:
+                classes.Add("alarm-warning");
+                break;
+            case 2:
+                classes.Add("alarm-error");
+                break;
+        }
+
+        if (IsBlinking && State > 0)
+        {
+            classes.Add("alarm-blink");
+        }
+
+        return string.Join(" ", classes);
+    }
+}

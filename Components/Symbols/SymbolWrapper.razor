@@ -5,15 +5,17 @@
     <MouseOver Context="isOver">
         <div class="rotated-layer" style="@GetRotationStyle()">
             <Selection IsSelected="@IsSelected" Style="width: 100%; height: 100%;" OnClick="OnClick">
-                <CrossFilter HasCrossFilter="@HasCrossFilter">
-                    <div style="@GetMirrorStyle()">
-                        <Enable IsEnabled="@IsEnabled">
-                            <Overlay OverlayContent="@OverlayContent">
-                                @ChildContent
-                            </Overlay>
-                        </Enable>
-                    </div>
-                </CrossFilter>
+                <Alarm State="@AlarmState" IsBlinking="@AlarmBlink">
+                    <CrossFilter HasCrossFilter="@HasCrossFilter">
+                        <div style="@GetMirrorStyle()">
+                            <Enable IsEnabled="@IsEnabled">
+                                <Overlay OverlayContent="@OverlayContent">
+                                    @ChildContent
+                                </Overlay>
+                            </Enable>
+                        </div>
+                    </CrossFilter>
+                </Alarm>
             </Selection>
         </div>
 
@@ -64,6 +66,8 @@
     [Parameter] public bool IsEnabled { get; set; } = true;
     [Parameter] public bool HasCommLoss { get; set; }
     [Parameter] public bool HasCrossFilter { get; set; }
+    [Parameter] public int AlarmState { get; set; } // 0=None, 1=Warning, 2=Error
+    [Parameter] public bool AlarmBlink { get; set; }
     
     // Paramètres de dimensionnement et rotation
     [Parameter] public int? Size { get; set; } // Gardé pour rétro-compatibilité
