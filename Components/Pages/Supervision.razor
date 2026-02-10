@@ -17,33 +17,37 @@
             <button class="btn btn-primary" @onclick="ToggleOverlay" disabled="@(SelectedId == null)">Toggle Overlay</button>
             <button class="btn btn-secondary" @onclick="ToggleEnable" disabled="@(SelectedId == null)">Toggle Enable</button>
             <button class="btn btn-danger" @onclick="ToggleCommLoss" disabled="@(SelectedId == null)">Toggle Comm Loss</button>
+            <button class="btn btn-warning" @onclick="ToggleCrossFilter" disabled="@(SelectedId == null)">Toggle Cross Filter</button>
         </div>
     </div>
 </div>
 
 <div class="supervision-grid">
     <div class="symbol-group">
-        <h3>Pumps</h3>
-        <Pump IsSelected="@(SelectedId == "pump1")" IsEnabled="@IsEnable("pump1")" HasCommLoss="@HasCommLoss("pump1")" OnClick="@(() => Select("pump1"))" OnSettingsClick="@(() => OpenSettings("pump1"))" OverlayContent="@GetOverlay("pump1")" />
-        <Pump Size="150" Rotation="45" IsSelected="@(SelectedId == "pump2")" IsEnabled="@IsEnable("pump2")" HasCommLoss="@HasCommLoss("pump2")" OnClick="@(() => Select("pump2"))" OnSettingsClick="@(() => OpenSettings("pump2"))" OverlayContent="@GetOverlay("pump2")" />
+        <h3>Pumps (Resized & Mirrored)</h3>
+        <Pump IsSelected="@(SelectedId == "pump1")" IsEnabled="@IsEnable("pump1")" HasCommLoss="@HasCommLoss("pump1")" HasCrossFilter="@HasCrossFilter("pump1")" OnClick="@(() => Select("pump1"))" OnSettingsClick="@(() => OpenSettings("pump1"))" OverlayContent="@GetOverlay("pump1")" />
+        <div style="margin-top: 10px;">
+             <!-- Pump 2: Resized 150x50, Mirrored X -->
+            <Pump Width="150" Height="50" MirrorX="true" IsSelected="@(SelectedId == "pump2")" IsEnabled="@IsEnable("pump2")" HasCommLoss="@HasCommLoss("pump2")" HasCrossFilter="@HasCrossFilter("pump2")" OnClick="@(() => Select("pump2"))" OnSettingsClick="@(() => OpenSettings("pump2"))" OverlayContent="@GetOverlay("pump2")" />
+        </div>
     </div>
 
     <div class="symbol-group">
-        <h3>Valves</h3>
-        <Valve IsSelected="@(SelectedId == "valve1")" IsEnabled="@IsEnable("valve1")" HasCommLoss="@HasCommLoss("valve1")" OnClick="@(() => Select("valve1"))" OnSettingsClick="@(() => OpenSettings("valve1"))" OverlayContent="@GetOverlay("valve1")" />
-        <Valve Size="80" IsSelected="@(SelectedId == "valve2")" IsEnabled="@IsEnable("valve2")" HasCommLoss="@HasCommLoss("valve2")" OnClick="@(() => Select("valve2"))" OnSettingsClick="@(() => OpenSettings("valve2"))" OverlayContent="@GetOverlay("valve2")" />
+        <h3>Valves (Rotated Selection)</h3>
+        <Valve IsSelected="@(SelectedId == "valve1")" IsEnabled="@IsEnable("valve1")" HasCommLoss="@HasCommLoss("valve1")" HasCrossFilter="@HasCrossFilter("valve1")" OnClick="@(() => Select("valve1"))" OnSettingsClick="@(() => OpenSettings("valve1"))" OverlayContent="@GetOverlay("valve1")" />
+        <Valve Size="80" Rotation="45" IsSelected="@(SelectedId == "valve2")" IsEnabled="@IsEnable("valve2")" HasCommLoss="@HasCommLoss("valve2")" HasCrossFilter="@HasCrossFilter("valve2")" OnClick="@(() => Select("valve2"))" OnSettingsClick="@(() => OpenSettings("valve2"))" OverlayContent="@GetOverlay("valve2")" />
     </div>
 
     <div class="symbol-group">
         <h3>Motors</h3>
-        <Moteur IsSelected="@(SelectedId == "motor1")" IsEnabled="@IsEnable("motor1")" HasCommLoss="@HasCommLoss("motor1")" OnClick="@(() => Select("motor1"))" OnSettingsClick="@(() => OpenSettings("motor1"))" OverlayContent="@GetOverlay("motor1")" />
-        <Moteur Rotation="90" IsSelected="@(SelectedId == "motor2")" IsEnabled="@IsEnable("motor2")" HasCommLoss="@HasCommLoss("motor2")" OnClick="@(() => Select("motor2"))" OnSettingsClick="@(() => OpenSettings("motor2"))" OverlayContent="@GetOverlay("motor2")" />
+        <Moteur IsSelected="@(SelectedId == "motor1")" IsEnabled="@IsEnable("motor1")" HasCommLoss="@HasCommLoss("motor1")" HasCrossFilter="@HasCrossFilter("motor1")" OnClick="@(() => Select("motor1"))" OnSettingsClick="@(() => OpenSettings("motor1"))" OverlayContent="@GetOverlay("motor1")" />
+        <Moteur Rotation="90" IsSelected="@(SelectedId == "motor2")" IsEnabled="@IsEnable("motor2")" HasCommLoss="@HasCommLoss("motor2")" HasCrossFilter="@HasCrossFilter("motor2")" OnClick="@(() => Select("motor2"))" OnSettingsClick="@(() => OpenSettings("motor2"))" OverlayContent="@GetOverlay("motor2")" />
     </div>
 
     <div class="symbol-group">
         <h3>Fans</h3>
-        <Fan IsSelected="@(SelectedId == "fan1")" IsEnabled="@IsEnable("fan1")" HasCommLoss="@HasCommLoss("fan1")" OnClick="@(() => Select("fan1"))" OnSettingsClick="@(() => OpenSettings("fan1"))" OverlayContent="@GetOverlay("fan1")" />
-        <Fan Size="120" Rotation="-45" IsSelected="@(SelectedId == "fan2")" IsEnabled="@IsEnable("fan2")" HasCommLoss="@HasCommLoss("fan2")" OnClick="@(() => Select("fan2"))" OnSettingsClick="@(() => OpenSettings("fan2"))" OverlayContent="@GetOverlay("fan2")" />
+        <Fan IsSelected="@(SelectedId == "fan1")" IsEnabled="@IsEnable("fan1")" HasCommLoss="@HasCommLoss("fan1")" HasCrossFilter="@HasCrossFilter("fan1")" OnClick="@(() => Select("fan1"))" OnSettingsClick="@(() => OpenSettings("fan1"))" OverlayContent="@GetOverlay("fan1")" />
+        <Fan Size="120" Rotation="-45" IsSelected="@(SelectedId == "fan2")" IsEnabled="@IsEnable("fan2")" HasCommLoss="@HasCommLoss("fan2")" HasCrossFilter="@HasCrossFilter("fan2")" OnClick="@(() => Select("fan2"))" OnSettingsClick="@(() => OpenSettings("fan2"))" OverlayContent="@GetOverlay("fan2")" />
     </div>
 
     <div class="symbol-group">
@@ -51,6 +55,13 @@
         <div style="width: 120px; height: 120px;">
             <Compass />
         </div>
+    </div>
+
+    <div class="symbol-group">
+        <h3>Inputs & Progress</h3>
+        <InputSymbol Label="Level" Unit="%" @bind-Value="ProgressValue" IsSelected="@(SelectedId == "input1")" IsEnabled="@IsEnable("input1")" HasCommLoss="@HasCommLoss("input1")" HasCrossFilter="@HasCrossFilter("input1")" OnClick="@(() => Select("input1"))" OnSettingsClick="@(() => OpenSettings("input1"))" OverlayContent="@GetOverlay("input1")" />
+        
+        <ProgressBar Value="@ProgressValue" Width="60" Height="150" IsSelected="@(SelectedId == "progress1")" IsEnabled="@IsEnable("progress1")" HasCommLoss="@HasCommLoss("progress1")" HasCrossFilter="@HasCrossFilter("progress1")" OnClick="@(() => Select("progress1"))" OnSettingsClick="@(() => OpenSettings("progress1"))" OverlayContent="@GetOverlay("progress1")" />
     </div>
 </div>
 
@@ -86,6 +97,9 @@
     private HashSet<string> DisabledIds { get; set; } = new();
     private HashSet<string> OverlayIds { get; set; } = new();
     private HashSet<string> CommLossIds { get; set; } = new();
+    private HashSet<string> CrossFilterIds { get; set; } = new();
+
+    private double ProgressValue { get; set; } = 50;
 
     private bool IsModalVisible { get; set; }
     private string? TargetSettingsId { get; set; }
@@ -96,8 +110,8 @@
     }
 
     private bool IsEnable(string id) => !DisabledIds.Contains(id);
-
     private bool HasCommLoss(string id) => CommLossIds.Contains(id);
+    private bool HasCrossFilter(string id) => CrossFilterIds.Contains(id);
 
     private RenderFragment? GetOverlay(string id)
     {
@@ -149,6 +163,21 @@
             else
             {
                 CommLossIds.Add(SelectedId);
+            }
+        }
+    }
+
+    private void ToggleCrossFilter()
+    {
+        if (SelectedId != null)
+        {
+            if (CrossFilterIds.Contains(SelectedId))
+            {
+                CrossFilterIds.Remove(SelectedId);
+            }
+            else
+            {
+                CrossFilterIds.Add(SelectedId);
             }
         }
     }

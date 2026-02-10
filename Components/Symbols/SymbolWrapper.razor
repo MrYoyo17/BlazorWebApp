@@ -1,29 +1,60 @@
 @using TestBlazor.Components.Symbols.Generics
 @using TestBlazor.Components.Symbols.Common
 
-<Selection IsSelected="@IsSelected" Style="@GetContainerStyle()" OnClick="OnClick">
+<div class="symbol-wrapper-root" style="@GetRootStyle()">
     <MouseOver Context="isOver">
-        <CommunicationLoss HasCommLoss="@HasCommLoss">
-            <div style="@GetContentStyle()">
-                <Enable IsEnabled="@IsEnabled">
-                    <Overlay OverlayContent="@OverlayContent">
-                        @ChildContent
-                    </Overlay>
-                </Enable>
+        <div class="rotated-layer" style="@GetRotationStyle()">
+            <Selection IsSelected="@IsSelected" Style="width: 100%; height: 100%;" OnClick="OnClick">
+                <CrossFilter HasCrossFilter="@HasCrossFilter">
+                    <div style="@GetMirrorStyle()">
+                        <Enable IsEnabled="@IsEnabled">
+                            <Overlay OverlayContent="@OverlayContent">
+                                @ChildContent
+                            </Overlay>
+                        </Enable>
+                    </div>
+                </CrossFilter>
+            </Selection>
+        </div>
+
+        @if (HasCommLoss)
+        {
+            <div class="static-indicator-left">
+                <CommLossIcon />
             </div>
-            
-            <Settings IsVisible="@isOver" OnClick="@OnSettingsClick" />
-        </CommunicationLoss>
+        }
+        
+        <Settings IsVisible="@isOver" OnClick="@OnSettingsClick" />
     </MouseOver>
-</Selection>
+</div>
 
 <style>
     /* Ensure generic wrappers fill the selection container */
     ::deep .mouseover-container, 
-    ::deep .comm-loss-container, 
-    ::deep .comm-loss-wrapper {
+    ::deep .cross-filter-container,
+    .rotated-layer {
         width: 100%;
         height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .symbol-wrapper-root {
+        position: relative;
+        display: inline-block;
+    }
+
+    .static-indicator-left {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        z-index: 10;
+        background: white;
+        border-radius: 50%;
+        padding: 2px;
+        border: 1px solid red;
+        line-height: 0;
     }
 </style>
 
@@ -32,31 +63,53 @@
     [Parameter] public bool IsSelected { get; set; }
     [Parameter] public bool IsEnabled { get; set; } = true;
     [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public bool HasCrossFilter { get; set; }
     
     // Paramètres de dimensionnement et rotation
-    [Parameter] public int Size { get; set; } = 100;
+    [Parameter] public int? Size { get; set; } // Gardé pour rétro-compatibilité
+    [Parameter] public int? Width { get; set; }
+    [Parameter] public int? Height { get; set; }
     [Parameter] public int Rotation { get; set; } = 0;
     
-    // RenderFragments : permettent d'injecter du contenu HTML/Razor depuis le composant parent.
-    // OverlayContent est affiché par-dessus le symbole (ex: infos tooltips).
+    // Paramètres de symétrie
+    [Parameter] public bool MirrorX { get; set; }
+    [Parameter] public bool MirrorY { get; set; }
+
+    // RenderFragments
     [Parameter] public RenderFragment? OverlayContent { get; set; }
-    // ChildContent est le contenu principal du wrapper (l'icône SVG du symbole spécifique).
     [Parameter] public RenderFragment? ChildContent { get; set; }
     
-    // EventCallback : permet de communiquer des événements vers le parent (ex: clic).
+    // EventCallbacks
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public EventCallback OnSettingsClick { get; set; }
 
-    // Génère le style du conteneur principal (taille fixe).
-    private string GetContainerStyle()
+    private int ActualWidth => Width ?? Size ?? 100;
+    private int ActualHeight => Height ?? Size ?? 100;
+
+    // Style Racine : Dimensions fixes
+    private string GetRootStyle()
     {
-        return $"width: {Size}px; height: {Size}px;";
+        return $"width: {ActualWidth}px; height: {ActualHeight}px;";
     }
 
-    // Génère le style du contenu rotatif.
-    // La rotation est appliquée ici pour ne tourner QUE l'icône, pas les indicateurs (Settings, CommLoss).
-    private string GetContentStyle()
+    // Style Rotation : sur le conteneur interne
+    private string GetRotationStyle()
     {
-        return $"width: 100%; height: 100%; transform: rotate({Rotation}deg); transform-origin: center;";
+        if (Rotation != 0)
+        {
+            return $"transform: rotate({Rotation}deg); transform-origin: center;";
+        }
+        return "";
+    }
+
+    // Style Miroir : sur le contenu
+    private string GetMirrorStyle()
+    {
+        var transform = "";
+        
+        if (MirrorX) transform += " scaleX(-1)";
+        if (MirrorY) transform += " scaleY(-1)";
+        
+        return $"width: 100%; height: 100%;{(string.IsNullOrEmpty(transform) ? "" : $" transform:{transform}; transform-origin: center;")}";
     }
 }

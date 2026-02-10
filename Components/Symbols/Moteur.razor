@@ -1,25 +1,25 @@
 @using TestBlazor.Components.Symbols.Common
 
-<SymbolWrapper IsSelected="@IsSelected" IsEnabled="@IsEnabled" HasCommLoss="@HasCommLoss" Size="@Size" Rotation="@Rotation" OverlayContent="@OverlayContent" OnClick="@OnClick" OnSettingsClick="@OnSettingsClick">
-    <div class="motor-symbol">
-        <MoteurIcon />
-    </div>
+<SymbolWrapper IsSelected="IsSelected" IsEnabled="IsEnabled" HasCommLoss="HasCommLoss" HasCrossFilter="HasCrossFilter" 
+               Size="Size" Width="Width" Height="Height" Rotation="Rotation" MirrorX="MirrorX" MirrorY="MirrorY"
+               OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
+    <MoteurIcon />
 </SymbolWrapper>
-
-<style>
-    .motor-symbol {
-        width: 100%;
-        height: 100%;
-    }
-</style>
 
 @code {
     [Parameter] public bool IsSelected { get; set; }
     [Parameter] public bool IsEnabled { get; set; } = true;
     [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public bool HasCrossFilter { get; set; }
+    
     [Parameter] public int Size { get; set; } = 100;
+    [Parameter] public int? Width { get; set; }
+    [Parameter] public int? Height { get; set; }
     [Parameter] public int Rotation { get; set; } = 0;
-    [Parameter] public RenderFragment? OverlayContent { get; set; }
+    [Parameter] public bool MirrorX { get; set; }
+    [Parameter] public bool MirrorY { get; set; }
+
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public EventCallback OnSettingsClick { get; set; }
+    [Parameter] public RenderFragment? OverlayContent { get; set; }
 }
