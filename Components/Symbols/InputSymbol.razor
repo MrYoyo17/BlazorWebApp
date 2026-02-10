@@ -7,7 +7,7 @@
                OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
     <div class="input-symbol-container">
         <label>@Label</label>
-        <input type="number" class="form-control" value="@Value" @onchange="OnValueChanged" @onclick:stopPropagation />
+        <input type="number" class="form-control" value="@Value" @oninput="OnValueChanged" @onclick:stopPropagation />
         <span class="unit">@Unit</span>
     </div>
 </SymbolWrapper>
