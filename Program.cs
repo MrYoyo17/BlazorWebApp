@@ -13,6 +13,7 @@ builder.Services.AddDbContext<TestBlazor.Data.ToDoDbContext>(options =>
 
 builder.Services.AddScoped<TestBlazor.Services.ToDoService>();
 builder.Services.AddSingleton<TestBlazor.Services.CompassService>();
+builder.Services.AddSingleton<TestBlazor.Services.SimulationService>();
 
 var app = builder.Build();
 
