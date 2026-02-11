@@ -14,11 +14,11 @@
         <text x="15" y="53" font-family="Arial" font-size="10" text-anchor="middle">W</text>
 
         <!-- Rotating Arrow -->
-        <g transform="rotate(@Heading, 50, 50)">
+        <g transform="rotate(@CurrentHeading, 50, 50)">
             <path d="M50 20 L60 80 L50 70 L40 80 Z" fill="red" stroke="black" stroke-width="1" />
         </g>
     </svg>
-    <div class="compass-text">@Heading°</div>
+    <div class="compass-text">@CurrentHeading°</div>
 </div>
 
 <style>
@@ -39,26 +39,27 @@
 </style>
 
 @code {
-    private int Heading => CompassService.Heading;
+    [Parameter] public int? Heading { get; set; }
+
+    private int CurrentHeading => Heading ?? CompassService.Heading;
 
     protected override void OnInitialized()
     {
         // S'abonne à l'événement de changement du service.
-        // Cela permet au composant de réagir aux mises à jour globales.
+        // Cela permet au composant de réagir aux mises à jour globales si le paramètre n'est pas fourni.
         CompassService.OnChange += OnCompassChange;
     }
 
     public void Dispose()
     {
-        // Désabonnement crucial pour éviter les fuites de mémoire.
-        // Si on ne se désabonne pas, le service gardera une référence vers ce composant, empêchant le Garbage Collector de le détruire.
         CompassService.OnChange -= OnCompassChange;
     }
 
     private async void OnCompassChange()
     {
-        // InvokeAsync assure que StateHasChanged est appelé sur le thread UI correct (le Dispatcher).
-        // C'est nécessaire car l'événement peut venir d'un autre contexte (ex: un autre utilisateur/session via un Singleton).
+        // Si le Heading est fourni via paramètre, on ne force pas le refresh ici car c'est le parent qui gère
+        if (Heading.HasValue) return;
+
         await InvokeAsync(StateHasChanged);
     }
 }

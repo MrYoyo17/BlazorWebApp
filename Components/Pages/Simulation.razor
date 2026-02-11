@@ -1,6 +1,7 @@
 @page "/simulation"
 @using TestBlazor.Services
 @using TestBlazor.Components.Symbols
+@using TestBlazor.Models.Symbols
 @inject SimulationService SimulationService
 @implements IDisposable
 @rendermode InteractiveServer
@@ -9,43 +10,81 @@
 
 <div class="row">
     <!-- Colonne Gauche : Jauge Moteur -->
-    <div class="col-md-4 text-center">
+    <div class="col-md-3 text-center">
         <h4>Vitesse Moteur</h4>
-        <div style="height: 300px; width: 100px; margin: auto;">
-            <ProgressBar Value="@SimulationService.MotorSpeed" 
-                         Color="@GetColor(SimulationService.MotorSpeed)" 
-                         Width="100" Height="300" 
-                         AlarmState="@SimulationService.AlarmState" 
-                         AlarmBlink="@(SimulationService.AlarmState == 2)" />
-        </div>
-        <p class="mt-2">@(SimulationService.MotorSpeed.ToString("0")) RPM</p>
+        @if (MotorFan != null)
+        {
+            <div style="height: 300px; width: 100px; margin: auto;">
+                <ProgressBar Value="@MotorFan.Speed" 
+                             Color="@GetColor(MotorFan.Speed)" 
+                             Width="100" Height="300" 
+                             AlarmState="@MotorFan.AlarmState" 
+                             AlarmBlink="@MotorFan.AlarmBlink" />
+            </div>
+            <p class="mt-2">@(MotorFan.Speed.ToString("0")) RPM</p>
+        }
+        else
+        {
+            <p>Chargement...</p>
+        }
     </div>
 
     <!-- Colonne Milieu : État Vanne -->
-    <div class="col-md-4 text-center">
+    <div class="col-md-3 text-center">
         <h4>État Vanne</h4>
-        <div style="height: 150px; width: 150px; margin: auto;">
-            <Valve IsSelected="false" 
-                   Rotation="@(SimulationService.IsValveOpen ? 90 : 0)" 
-                   Width="150" Height="150" />
-        </div>
-        <p class="mt-2">@(SimulationService.IsValveOpen ? "OUVERTE (90°)" : "FERMÉE (0°)")</p>
+        @if (InletValve != null)
+        {
+            <div style="height: 150px; width: 150px; margin: auto;">
+                <Valve IsSelected="false" 
+                       Rotation="@(InletValve.IsOpen ? 90 : 0)" 
+                       Width="150" Height="150" />
+            </div>
+            <p class="mt-2">@(InletValve.IsOpen ? "OUVERTE (90°)" : "FERMÉE (0°)")</p>
+        }
+        else
+        {
+            <p>Chargement...</p>
+        }
     </div>
 
     <!-- Colonne Droite : Niveau Cuve -->
-    <div class="col-md-4 text-center">
+    <div class="col-md-3 text-center">
         <h4>Niveau Cuve</h4>
-        <div style="height: 300px; width: 100px; margin: auto;">
-            <ProgressBar Value="@SimulationService.TankLevel" 
-                         Color="#17a2b8" 
-                         Width="100" Height="300" />
-        </div>
-        <p class="mt-2">@(SimulationService.TankLevel.ToString("0")) %</p>
+        @if (TankLevel != null)
+        {
+            <div style="height: 300px; width: 100px; margin: auto;">
+                <ProgressBar Value="@TankLevel.Value" 
+                             Color="#17a2b8" 
+                             Width="100" Height="300" 
+                             AlarmState="@TankLevel.AlarmState" />
+            </div>
+            <p class="mt-2">@(TankLevel.Value.ToString("0")) %</p>
+        }
+        else
+        {
+            <p>Chargement...</p>
+        }
+    </div>
+
+    <!-- Colonne Compass -->
+    <div class="col-md-3 text-center">
+        <h4>Compass</h4>
+        @if (SimCompass != null)
+        {
+            <div style="height: 150px; width: 150px; margin: auto;">
+                <Compass Heading="@SimCompass.Heading" />
+            </div>
+            <p class="mt-2">@SimCompass.Heading°</p>
+        }
+        else
+        {
+            <p>Chargement...</p>
+        }
     </div>
 </div>
 
 <div class="alert alert-info mt-4">
-    <p>Cette page affiche des données simulées par <code>SimulationService</code>.</p>
+    <p>Cette page affiche des données simulées par <code>SimulationService</code> via des entités.</p>
     <ul>
         <li><strong>Vitesse Moteur :</strong> Change aléatoirement. Passe en alarme > 75 (Jaune) et > 90 (Rouge/Clignotant).</li>
         <li><strong>Vanne :</strong> S'ouvre et se ferme aléatoirement.</li>
@@ -54,8 +93,19 @@
 </div>
 
 @code {
+    private FanProperties? MotorFan;
+    private ValveProperties? InletValve;
+    private AnalogDisplayProperties? TankLevel;
+    private CompassProperties? SimCompass;
+
     protected override void OnInitialized()
     {
+        // Récupération des symboles par nom ou type
+        MotorFan = SimulationService.Symbols.OfType<FanProperties>().FirstOrDefault(f => f.Name == "Main Fan");
+        InletValve = SimulationService.Symbols.OfType<ValveProperties>().FirstOrDefault(v => v.Name == "Inlet Valve");
+        TankLevel = SimulationService.Symbols.OfType<AnalogDisplayProperties>().FirstOrDefault(t => t.Name == "Tank Level");
+        SimCompass = SimulationService.Symbols.OfType<CompassProperties>().FirstOrDefault(c => c.Name == "Navigation");
+
         SimulationService.OnChange += OnSimulationChange;
     }
 
@@ -66,6 +116,7 @@
 
     private async void OnSimulationChange()
     {
+        // Re-render
         await InvokeAsync(StateHasChanged);
     }
 
