@@ -3,10 +3,23 @@
 @using TestBlazor.Components.Symbols
 @using TestBlazor.Models.Symbols
 @inject SimulationService SimulationService
+@inject WcfService WcfService
 @implements IDisposable
 @rendermode InteractiveServer
 
-<h3>Simulation Temps Réel</h3>
+<PageTitle>Simulation</PageTitle>
+
+<h1>Tableau de contrôle</h1>
+
+<div class="mt-4 p-3 border rounded bg-light">
+    <h3>Test WCF</h3>
+    <button class="btn btn-primary" @onclick="TestWcf">Appeler Service WCF (Add 10+20)</button>
+    <p class="mt-2">Résultat: @WcfResult</p>
+    @if (!string.IsNullOrEmpty(WcfError))
+    {
+        <div class="alert alert-danger">@WcfError</div>
+    }
+</div>
 
 <div class="row">
     <!-- Colonne Gauche : Jauge Moteur -->
@@ -15,11 +28,10 @@
         @if (MotorFan != null)
         {
             <div style="height: 300px; width: 100px; margin: auto;">
-                <ProgressBar Value="@MotorFan.Speed" 
+                <ProgressBar Symbol="@MotorFan"
+                             Value="@MotorFan.Speed" 
                              Color="@GetColor(MotorFan.Speed)" 
-                             Width="100" Height="300" 
-                             AlarmState="@MotorFan.AlarmState" 
-                             AlarmBlink="@MotorFan.AlarmBlink" />
+                             Width="100" Height="300" />
             </div>
             <p class="mt-2">@(MotorFan.Speed.ToString("0")) RPM</p>
         }
@@ -35,8 +47,7 @@
         @if (InletValve != null)
         {
             <div style="height: 150px; width: 150px; margin: auto;">
-                <Valve IsSelected="false" 
-                       Rotation="@(InletValve.IsOpen ? 90 : 0)" 
+                <Valve Symbol="@InletValve"
                        Width="150" Height="150" />
             </div>
             <p class="mt-2">@(InletValve.IsOpen ? "OUVERTE (90°)" : "FERMÉE (0°)")</p>
@@ -53,10 +64,10 @@
         @if (TankLevel != null)
         {
             <div style="height: 300px; width: 100px; margin: auto;">
-                <ProgressBar Value="@TankLevel.Value" 
+                <ProgressBar Symbol="@TankLevel"
+                             Value="@TankLevel.Value" 
                              Color="#17a2b8" 
-                             Width="100" Height="300" 
-                             AlarmState="@TankLevel.AlarmState" />
+                             Width="100" Height="300" />
             </div>
             <p class="mt-2">@(TankLevel.Value.ToString("0")) %</p>
         }
@@ -72,7 +83,7 @@
         @if (SimCompass != null)
         {
             <div style="height: 150px; width: 150px; margin: auto;">
-                <Compass Heading="@SimCompass.Heading" />
+                <Compass Symbol="@SimCompass" />
             </div>
             <p class="mt-2">@SimCompass.Heading°</p>
         }
@@ -125,5 +136,25 @@
         if (value > 90) return "#dc3545"; // Rouge
         if (value > 75) return "#ffc107"; // Jaune
         return "#28a745"; // Vert
+    }
+
+    // WCF Test
+    private string WcfResult = "-";
+    private string WcfError = "";
+
+    private async Task TestWcf()
+    {
+        WcfResult = "Appel en cours...";
+        WcfError = "";
+        try
+        {
+            var res = await WcfService.AddAsync(10, 20);
+            WcfResult = res.ToString();
+        }
+        catch (Exception ex)
+        {
+            WcfError = $"Erreur: {ex.Message} (Normal si pas de serveur)";
+            WcfResult = "Erreur";
+        }
     }
 }

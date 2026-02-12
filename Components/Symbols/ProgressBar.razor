@@ -1,13 +1,13 @@
 @using TestBlazor.Components.Symbols
 @using TestBlazor.Components.Symbols.Generics
 
-<SymbolWrapper IsSelected="IsSelected" IsEnabled="IsEnabled" HasCommLoss="HasCommLoss" HasCrossFilter="HasCrossFilter"
-               AlarmState="AlarmState" AlarmBlink="AlarmBlink"
+<SymbolWrapper Symbol="Symbol" 
+               HasCrossFilter="HasCrossFilter"
                Width="Width" Height="Height" Rotation="Rotation" MirrorX="MirrorX" MirrorY="MirrorY"
                OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
     <div class="progress-container">
-        <div class="progress-bar" style="height: @Value%; background-color: @Color;"></div>
-        <div class="progress-value">@Value%</div>
+        <div class="progress-bar" style="height: @CurrentValue%; background-color: @Color;"></div>
+        <div class="progress-value">@CurrentValue%</div>
     </div>
 </SymbolWrapper>
 
@@ -40,18 +40,16 @@
         pointer-events: none;
     }
 </style>
+@using TestBlazor.Models.Symbols
 
 @code {
+    [Parameter] public AnalogDisplayProperties? Symbol { get; set; }
+
     [Parameter] public double Value { get; set; } = 0; // 0 to 100
     [Parameter] public string Color { get; set; } = "#28a745"; // Green
     
-    // Wrapped Params
-    [Parameter] public bool IsSelected { get; set; }
-    [Parameter] public bool IsEnabled { get; set; } = true;
-    [Parameter] public bool HasCommLoss { get; set; }
+    // Remaining Params
     [Parameter] public bool HasCrossFilter { get; set; }
-    [Parameter] public int AlarmState { get; set; }
-    [Parameter] public bool AlarmBlink { get; set; }
     
     [Parameter] public int Width { get; set; } = 50;
     [Parameter] public int Height { get; set; } = 150;
@@ -62,4 +60,7 @@
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public EventCallback OnSettingsClick { get; set; }
     [Parameter] public RenderFragment? OverlayContent { get; set; }
+
+    // Computed Properties
+    private double CurrentValue => Symbol != null ? Symbol.Value : Value;
 }

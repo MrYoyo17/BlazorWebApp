@@ -1,19 +1,16 @@
-@using TestBlazor.Components.Symbols.Common
+@using TestBlazor.Models.Symbols
 
-<SymbolWrapper IsSelected="IsSelected" IsEnabled="IsEnabled" HasCommLoss="HasCommLoss" HasCrossFilter="HasCrossFilter" 
-               AlarmState="AlarmState" AlarmBlink="AlarmBlink"
+<SymbolWrapper Symbol="Symbol" 
+               HasCrossFilter="HasCrossFilter" 
                Size="Size" Width="Width" Height="Height" Rotation="Rotation" MirrorX="MirrorX" MirrorY="MirrorY"
                OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
     <MoteurIcon />
 </SymbolWrapper>
 
 @code {
-    [Parameter] public bool IsSelected { get; set; }
-    [Parameter] public bool IsEnabled { get; set; } = true;
-    [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public RotatingMachineProperties? Symbol { get; set; }
+
     [Parameter] public bool HasCrossFilter { get; set; }
-    [Parameter] public int AlarmState { get; set; }
-    [Parameter] public bool AlarmBlink { get; set; }
     
     [Parameter] public int Size { get; set; } = 100;
     [Parameter] public int? Width { get; set; }

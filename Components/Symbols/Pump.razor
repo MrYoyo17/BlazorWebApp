@@ -1,19 +1,19 @@
 @using TestBlazor.Components.Symbols.Common
 
-<SymbolWrapper IsSelected="IsSelected" IsEnabled="IsEnabled" HasCommLoss="HasCommLoss" HasCrossFilter="HasCrossFilter"
-               AlarmState="AlarmState" AlarmBlink="AlarmBlink"
-               Size="Size" Width="Width" Height="Height" Rotation="Rotation" MirrorX="MirrorX" MirrorY="MirrorY"
+@using TestBlazor.Models.Symbols
+
+<SymbolWrapper Symbol="Symbol" 
+               HasCrossFilter="HasCrossFilter" 
+               Size="Size" Width="Width" Height="Height" Rotation="CurrentRotation" MirrorX="MirrorX" MirrorY="MirrorY"
                OverlayContent="OverlayContent" OnClick="OnClick" OnSettingsClick="OnSettingsClick">
     <PumpIcon />
 </SymbolWrapper>
 
 @code {
-    [Parameter] public bool IsSelected { get; set; }
-    [Parameter] public bool IsEnabled { get; set; } = true;
-    [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public PumpProperties? Symbol { get; set; }
+
+    // Remaining Params
     [Parameter] public bool HasCrossFilter { get; set; }
-    [Parameter] public int AlarmState { get; set; }
-    [Parameter] public bool AlarmBlink { get; set; }
     
     [Parameter] public int Size { get; set; } = 100;
     [Parameter] public int? Width { get; set; }
@@ -25,4 +25,7 @@
     [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
     [Parameter] public EventCallback OnSettingsClick { get; set; }
     [Parameter] public RenderFragment? OverlayContent { get; set; }
+
+    // Computed Properties
+    private int CurrentRotation => Rotation;
 }

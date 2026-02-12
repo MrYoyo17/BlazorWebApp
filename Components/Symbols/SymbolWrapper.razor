@@ -1,14 +1,15 @@
 @using TestBlazor.Components.Symbols.Generics
 @using TestBlazor.Components.Symbols.Common
+@using TestBlazor.Models.Symbols
 
 <div class="symbol-wrapper-root" style="@GetRootStyle()">
     <MouseOver Context="isOver">
         <div class="rotated-layer" style="@GetRotationStyle()">
-            <Selection IsSelected="@IsSelected" Style="width: 100%; height: 100%;" OnClick="OnClick">
-                <Alarm State="@AlarmState" IsBlinking="@AlarmBlink">
+            <Selection IsSelected="@EffectiveIsSelected" Style="width: 100%; height: 100%;" OnClick="OnClick">
+                <Alarm State="@EffectiveAlarmState" IsBlinking="@EffectiveAlarmBlink">
                     <CrossFilter HasCrossFilter="@HasCrossFilter">
                         <div style="@GetMirrorStyle()">
-                            <Enable IsEnabled="@IsEnabled">
+                            <Enable IsEnabled="@EffectiveIsEnabled">
                                 <Overlay OverlayContent="@OverlayContent">
                                     @ChildContent
                                 </Overlay>
@@ -19,7 +20,7 @@
             </Selection>
         </div>
 
-        @if (HasCommLoss)
+        @if (EffectiveHasCommLoss)
         {
             <div class="static-indicator-left">
                 <CommLossIcon />
@@ -60,13 +61,24 @@
 </style>
 
 @code {
-    // Paramètres d'état visuel du symbole
-    [Parameter] public bool IsSelected { get; set; }
-    [Parameter] public bool IsEnabled { get; set; } = true;
-    [Parameter] public bool HasCommLoss { get; set; }
+    [Parameter] public SymbolProperties? Symbol { get; set; }
+
+    // Paramètres d'état visuel du symbole (SUPPRIMÉS - Utiliser Symbol)
+    // [Parameter] public bool IsSelected { get; set; }
+    // [Parameter] public bool IsEnabled { get; set; } = true;
+    // [Parameter] public bool HasCommLoss { get; set; }
+    // ...
+    // NOTE: HasCrossFilter is NOT in SymbolProperties yet, so keeping it or removing if user wants ALL common params removed.
+    // User request: "supprime les paramètres des composants qui sont déjà présent dans les entités"
+    // HasCrossFilter is NOT in entity. So keep it.
     [Parameter] public bool HasCrossFilter { get; set; }
-    [Parameter] public int AlarmState { get; set; } // 0=None, 1=Warning, 2=Error
-    [Parameter] public bool AlarmBlink { get; set; }
+    
+    // Computed Properties
+    private bool EffectiveIsSelected => Symbol?.IsSelected ?? false;
+    private bool EffectiveIsEnabled => Symbol?.IsEnabled ?? true; // Default to true if no symbol
+    private bool EffectiveHasCommLoss => Symbol?.HasCommLoss ?? false;
+    private int EffectiveAlarmState => Symbol?.AlarmState ?? 0;
+    private bool EffectiveAlarmBlink => Symbol?.AlarmBlink ?? false;
     
     // Paramètres de dimensionnement et rotation
     [Parameter] public int? Size { get; set; } // Gardé pour rétro-compatibilité

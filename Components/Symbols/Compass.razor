@@ -38,10 +38,13 @@
     }
 </style>
 
+@using TestBlazor.Models.Symbols
+
 @code {
+    [Parameter] public CompassProperties? Symbol { get; set; }
     [Parameter] public int? Heading { get; set; }
 
-    private int CurrentHeading => Heading ?? CompassService.Heading;
+    private int CurrentHeading => Symbol?.Heading ?? Heading ?? CompassService.Heading;
 
     protected override void OnInitialized()
     {
