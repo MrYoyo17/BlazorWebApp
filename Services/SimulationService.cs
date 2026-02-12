@@ -33,7 +33,9 @@ public class SimulationService : IDisposable
         var fan = new FanProperties("Main Fan")
         {
             Speed = 0,
-            IsRunning = false
+            IsRunning = false,
+            X = 50,
+            Y = 50
         };
         Symbols.Add(fan);
 
@@ -41,21 +43,27 @@ public class SimulationService : IDisposable
         var pump = new PumpProperties("Feed Pump")
         {
             Speed = 0,
-            IsRunning = false
+            IsRunning = false,
+            X = 50,
+            Y = 250
         };
         Symbols.Add(pump);
 
         // Valve
         var valve = new ValveProperties("Inlet Valve")
         {
-            IsOpen = false
+            IsOpen = false,
+            X = 250,
+            Y = 200
         };
         Symbols.Add(valve);
 
         // Compass
         var compass = new CompassProperties("Navigation")
         {
-            Heading = 0
+            Heading = 0,
+            X = 450,
+            Y = 50
         };
         Symbols.Add(compass);
 
@@ -65,7 +73,9 @@ public class SimulationService : IDisposable
             Value = 50,
             MinValue = 0,
             MaxValue = 100,
-            Unit = "%"
+            Unit = "%",
+            X = 450,
+            Y = 250
         };
         Symbols.Add(tankLevel);
     }

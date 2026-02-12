@@ -21,78 +21,61 @@
     }
 </div>
 
-<div class="row">
-    <!-- Colonne Gauche : Jauge Moteur -->
-    <div class="col-md-3 text-center">
-        <h4>Vitesse Moteur</h4>
-        @if (MotorFan != null)
-        {
-            <div style="height: 300px; width: 100px; margin: auto;">
-                <ProgressBar Symbol="@MotorFan"
-                             Value="@MotorFan.Speed" 
-                             Color="@GetColor(MotorFan.Speed)" 
-                             Width="100" Height="300" />
-            </div>
-            <p class="mt-2">@(MotorFan.Speed.ToString("0")) RPM</p>
-        }
-        else
-        {
-            <p>Chargement...</p>
-        }
-    </div>
+<div class="simulation-view-container">
+    @if (MotorFan != null)
+    {
+        <Fan Symbol="@MotorFan" Width="100" />
+        <div style="position: absolute; left: @(MotorFan.X)px; top: @(MotorFan.Y + 110)px; width: 100px; text-align: center;">
+            <p>@(MotorFan.Speed.ToString("0")) RPM</p>
+        </div>
+    }
 
-    <!-- Colonne Milieu : État Vanne -->
-    <div class="col-md-3 text-center">
-        <h4>État Vanne</h4>
-        @if (InletValve != null)
-        {
-            <div style="height: 150px; width: 150px; margin: auto;">
-                <Valve Symbol="@InletValve"
-                       Width="150" Height="150" />
-            </div>
-            <p class="mt-2">@(InletValve.IsOpen ? "OUVERTE (90°)" : "FERMÉE (0°)")</p>
-        }
-        else
-        {
-            <p>Chargement...</p>
-        }
-    </div>
+    @if (InletValve != null)
+    {
+        <Valve Symbol="@InletValve" Width="100" Height="100" />
+        <div style="position: absolute; left: @(InletValve.X)px; top: @(InletValve.Y + 110)px; width: 100px; text-align: center;">
+            <p>@(InletValve.IsOpen ? "OUVERTE" : "FERMÉE")</p>
+        </div>
+    }
 
-    <!-- Colonne Droite : Niveau Cuve -->
-    <div class="col-md-3 text-center">
-        <h4>Niveau Cuve</h4>
-        @if (TankLevel != null)
-        {
-            <div style="height: 300px; width: 100px; margin: auto;">
-                <ProgressBar Symbol="@TankLevel"
-                             Value="@TankLevel.Value" 
-                             Color="#17a2b8" 
-                             Width="100" Height="300" />
-            </div>
-            <p class="mt-2">@(TankLevel.Value.ToString("0")) %</p>
-        }
-        else
-        {
-            <p>Chargement...</p>
-        }
-    </div>
-
-    <!-- Colonne Compass -->
-    <div class="col-md-3 text-center">
-        <h4>Compass</h4>
-        @if (SimCompass != null)
-        {
-            <div style="height: 150px; width: 150px; margin: auto;">
-                <Compass Symbol="@SimCompass" />
-            </div>
-            <p class="mt-2">@SimCompass.Heading°</p>
-        }
-        else
-        {
-            <p>Chargement...</p>
-        }
-    </div>
+    @if (TankLevel != null)
+    {
+        <ProgressBar Symbol="@TankLevel" Width="80" Height="200" />
+        <div style="position: absolute; left: @(TankLevel.X)px; top: @(TankLevel.Y + 210)px; width: 80px; text-align: center;">
+            <p>@(TankLevel.Value.ToString("0")) %</p>
+        </div>
+    }
+    
+    @if (SimCompass != null)
+    {
+        <div style="position: absolute; left: @(SimCompass.X)px; top: @(SimCompass.Y)px; width: 150px; height: 150px;">
+            <Compass Symbol="@SimCompass" />
+        </div>
+        <div style="position: absolute; left: @(SimCompass.X)px; top: @(SimCompass.Y + 160)px; width: 150px; text-align: center;">
+            <p>@SimCompass.Heading°</p>
+        </div>
+    }
+    
+    @if (FeedPump != null)
+    {
+        <Pump Symbol="@FeedPump" Width="100" />
+        <div style="position: absolute; left: @(FeedPump.X)px; top: @(FeedPump.Y + 110)px; width: 100px; text-align: center;">
+            <p>@(FeedPump.IsRunning ? "ON" : "OFF")</p>
+        </div>
+    }
 </div>
+
+<style>
+    .simulation-view-container {
+        position: relative;
+        width: 800px;
+        height: 600px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        margin-top: 20px;
+        overflow: hidden; /* avoid scrollbars if elements stick out slightly */
+    }
+</style>
 
 <div class="alert alert-info mt-4">
     <p>Cette page affiche des données simulées par <code>SimulationService</code> via des entités.</p>
@@ -108,6 +91,7 @@
     private ValveProperties? InletValve;
     private AnalogDisplayProperties? TankLevel;
     private CompassProperties? SimCompass;
+    private PumpProperties? FeedPump;
 
     protected override void OnInitialized()
     {
@@ -116,6 +100,7 @@
         InletValve = SimulationService.Symbols.OfType<ValveProperties>().FirstOrDefault(v => v.Name == "Inlet Valve");
         TankLevel = SimulationService.Symbols.OfType<AnalogDisplayProperties>().FirstOrDefault(t => t.Name == "Tank Level");
         SimCompass = SimulationService.Symbols.OfType<CompassProperties>().FirstOrDefault(c => c.Name == "Navigation");
+        FeedPump = SimulationService.Symbols.OfType<PumpProperties>().FirstOrDefault(p => p.Name == "Feed Pump");
 
         SimulationService.OnChange += OnSimulationChange;
     }

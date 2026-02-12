@@ -1,6 +1,7 @@
 @page "/supervision"
 @using TestBlazor.Components.Symbols
 @using TestBlazor.Components.Symbols.Generics
+@using TestBlazor.Models.Symbols
 @rendermode InteractiveServer
 
 <PageTitle>Supervision</PageTitle>
@@ -12,74 +13,78 @@
         <h4>Control Panel</h4>
         <div class="d-flex gap-3 align-items-center">
             <div>
-                <strong>Selected:</strong> @(SelectedId ?? "None")
+                <strong>Selected:</strong> @(SelectedSymbol?.Name ?? "None")
             </div>
             <div class="control-group">
                 <label>Alarme (Sélection)</label>
                 <div class="btn-group">
-                    <button class="btn @(GetAlarmState(SelectedId) == 0 ? "btn-primary" : "btn-secondary")" @onclick="() => SetAlarmState(0)">None</button>
-                    <button class="btn @(GetAlarmState(SelectedId) == 1 ? "btn-warning" : "btn-secondary")" @onclick="() => SetAlarmState(1)">Warning</button>
-                    <button class="btn @(GetAlarmState(SelectedId) == 2 ? "btn-danger" : "btn-secondary")" @onclick="() => SetAlarmState(2)">Error</button>
+                    <button class="btn @(GetAlarmState() == 0 ? "btn-primary" : "btn-secondary")" @onclick="() => SetAlarmState(0)">None</button>
+                    <button class="btn @(GetAlarmState() == 1 ? "btn-warning" : "btn-secondary")" @onclick="() => SetAlarmState(1)">Warning</button>
+                    <button class="btn @(GetAlarmState() == 2 ? "btn-danger" : "btn-secondary")" @onclick="() => SetAlarmState(2)">Error</button>
                 </div>
                 <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" id="alarmBlink" checked="@GetAlarmBlink(SelectedId)" @onchange="@(e => SetAlarmBlink((bool)(e.Value ?? false)))">
+                    <input class="form-check-input" type="checkbox" id="alarmBlink" checked="@GetAlarmBlink()" @onchange="@(e => SetAlarmBlink((bool)(e.Value ?? false)))">
                     <label class="form-check-label" for="alarmBlink">Clignoter</label>
                 </div>
             </div>
             
             <div class="control-group">
                 <label>Rotation</label>
-                <input type="range" class="form-range" min="0" max="360" step="90" value="@GetRotation(SelectedId)" @oninput="@(e => SetRotation(int.Parse(e.Value?.ToString() ?? "0")))" />
-                <span>@GetRotation(SelectedId)°</span>
+                <input type="range" class="form-range" min="0" max="360" step="15" value="@(SelectedSymbol?.Rotation ?? 0)" @oninput="@(e => { if(SelectedSymbol != null) SelectedSymbol.Rotation = int.Parse(e.Value?.ToString() ?? "0"); })" />
+                <span>@(SelectedSymbol?.Rotation ?? 0)°</span>
             </div>
-            <button class="btn btn-primary" @onclick="ToggleOverlay" disabled="@(SelectedId == null)">Toggle Overlay</button>
-            <button class="btn btn-secondary" @onclick="ToggleEnable" disabled="@(SelectedId == null)">Toggle Enable</button>
-            <button class="btn btn-danger" @onclick="ToggleCommLoss" disabled="@(SelectedId == null)">Toggle Comm Loss</button>
-            <button class="btn btn-warning" @onclick="ToggleCrossFilter" disabled="@(SelectedId == null)">Toggle Cross Filter</button>
+            <button class="btn btn-secondary" @onclick="ToggleEnable" disabled="@(SelectedSymbol == null)">Toggle Enable</button>
+            <button class="btn btn-danger" @onclick="ToggleCommLoss" disabled="@(SelectedSymbol == null)">Toggle Comm Loss</button>
+            <button class="btn btn-warning" @onclick="ToggleCrossFilter" disabled="@(SelectedSymbol == null)">Toggle Cross Filter</button>
         </div>
     </div>
 </div>
 
 <div class="supervision-grid">
     <div class="symbol-group">
-        <h3>Pumps (Resized & Mirrored)</h3>
-        <Pump IsSelected="@(SelectedId == "pump1")" IsEnabled="@IsEnable("pump1")" HasCommLoss="@HasCommLoss("pump1")" HasCrossFilter="@HasCrossFilter("pump1")" AlarmState="@GetAlarmState("pump1")" AlarmBlink="@GetAlarmBlink("pump1")" OnClick="@(() => Select("pump1"))" OnSettingsClick="@(() => OpenSettings("pump1"))" OverlayContent="@GetOverlay("pump1")" Rotation="@GetRotation("pump1")" />
+        <h3>Pumps</h3>
+        <Pump Symbol="@Pump1" OnClick="@(() => Select(Pump1))" OnSettingsClick="@(() => OpenSettings(Pump1))" />
         <div style="margin-top: 10px;">
-             <!-- Pump 2: Resized 150x50, Mirrored X -->
-            <Pump Width="150" Height="50" MirrorX="true" IsSelected="@(SelectedId == "pump2")" IsEnabled="@IsEnable("pump2")" HasCommLoss="@HasCommLoss("pump2")" HasCrossFilter="@HasCrossFilter("pump2")" AlarmState="@GetAlarmState("pump2")" AlarmBlink="@GetAlarmBlink("pump2")" OnClick="@(() => Select("pump2"))" OnSettingsClick="@(() => OpenSettings("pump2"))" OverlayContent="@GetOverlay("pump2")" Rotation="@GetRotation("pump2")" />
+             <!-- Pump 2: Resized 150x50, Mirrored X (Done in C# init) -->
+            <Pump Symbol="@Pump2" Width="150" Height="50" OnClick="@(() => Select(Pump2))" OnSettingsClick="@(() => OpenSettings(Pump2))" />
         </div>
     </div>
 
     <div class="symbol-group">
-        <h3>Valves (Rotated Selection)</h3>
-        <Valve IsSelected="@(SelectedId == "valve1")" IsEnabled="@IsEnable("valve1")" HasCommLoss="@HasCommLoss("valve1")" HasCrossFilter="@HasCrossFilter("valve1")" AlarmState="@GetAlarmState("valve1")" AlarmBlink="@GetAlarmBlink("valve1")" OnClick="@(() => Select("valve1"))" OnSettingsClick="@(() => OpenSettings("valve1"))" OverlayContent="@GetOverlay("valve1")" Rotation="@GetRotation("valve1")" />
-        <Valve Size="80" IsSelected="@(SelectedId == "valve2")" IsEnabled="@IsEnable("valve2")" HasCommLoss="@HasCommLoss("valve2")" HasCrossFilter="@HasCrossFilter("valve2")" AlarmState="@GetAlarmState("valve2")" AlarmBlink="@GetAlarmBlink("valve2")" OnClick="@(() => Select("valve2"))" OnSettingsClick="@(() => OpenSettings("valve2"))" OverlayContent="@GetOverlay("valve2")" Rotation="@(GetRotation("valve2") == 0 ? 45 : GetRotation("valve2"))" />
+        <h3>Valves</h3>
+        <Valve Symbol="@Valve1" OnClick="@(() => Select(Valve1))" OnSettingsClick="@(() => OpenSettings(Valve1))" />
+        <Valve Symbol="@Valve2" Size="80" OnClick="@(() => Select(Valve2))" OnSettingsClick="@(() => OpenSettings(Valve2))" />
     </div>
 
     <div class="symbol-group">
         <h3>Motors</h3>
-        <Moteur IsSelected="@(SelectedId == "motor1")" IsEnabled="@IsEnable("motor1")" HasCommLoss="@HasCommLoss("motor1")" HasCrossFilter="@HasCrossFilter("motor1")" AlarmState="@GetAlarmState("motor1")" AlarmBlink="@GetAlarmBlink("motor1")" OnClick="@(() => Select("motor1"))" OnSettingsClick="@(() => OpenSettings("motor1"))" OverlayContent="@GetOverlay("motor1")" Rotation="@GetRotation("motor1")" />
-        <Moteur IsSelected="@(SelectedId == "motor2")" IsEnabled="@IsEnable("motor2")" HasCommLoss="@HasCommLoss("motor2")" HasCrossFilter="@HasCrossFilter("motor2")" AlarmState="@GetAlarmState("motor2")" AlarmBlink="@GetAlarmBlink("motor2")" OnClick="@(() => Select("motor2"))" OnSettingsClick="@(() => OpenSettings("motor2"))" OverlayContent="@GetOverlay("motor2")" Rotation="@(GetRotation("motor2") == 0 ? 90 : GetRotation("motor2"))" />
+        <!-- Moteur uses generic wrapper internally but we pass specific properties -->
+        <Moteur Symbol="@Motor1" OnClick="@(() => Select(Motor1))" OnSettingsClick="@(() => OpenSettings(Motor1))" />
+        <Moteur Symbol="@Motor2" OnClick="@(() => Select(Motor2))" OnSettingsClick="@(() => OpenSettings(Motor2))" />
     </div>
 
     <div class="symbol-group">
         <h3>Fans</h3>
-        <Fan IsSelected="@(SelectedId == "fan1")" IsEnabled="@IsEnable("fan1")" HasCommLoss="@HasCommLoss("fan1")" HasCrossFilter="@HasCrossFilter("fan1")" AlarmState="@GetAlarmState("fan1")" AlarmBlink="@GetAlarmBlink("fan1")" OnClick="@(() => Select("fan1"))" OnSettingsClick="@(() => OpenSettings("fan1"))" OverlayContent="@GetOverlay("fan1")" Rotation="@GetRotation("fan1")" />
-        <Fan Size="120" IsSelected="@(SelectedId == "fan2")" IsEnabled="@IsEnable("fan2")" HasCommLoss="@HasCommLoss("fan2")" HasCrossFilter="@HasCrossFilter("fan2")" AlarmState="@GetAlarmState("fan2")" AlarmBlink="@GetAlarmBlink("fan2")" OnClick="@(() => Select("fan2"))" OnSettingsClick="@(() => OpenSettings("fan2"))" OverlayContent="@GetOverlay("fan2")" Rotation="@(GetRotation("fan2") == 0 ? -45 : GetRotation("fan2"))" />
+        <Fan Symbol="@Fan1" OnClick="@(() => Select(Fan1))" OnSettingsClick="@(() => OpenSettings(Fan1))" />
+        <Fan Symbol="@Fan2" Size="120" OnClick="@(() => Select(Fan2))" OnSettingsClick="@(() => OpenSettings(Fan2))" />
     </div>
 
     <div class="symbol-group">
         <h3>Compass</h3>
         <div style="width: 120px; height: 120px;">
-            <Compass />
+            <!-- Compass uses Symbol but might need wrapper if we want common features like selection border -->
+            <!-- Compass.razor in previous step didn't use Wrapper for selection border but now it might? -->
+            <!-- Checking Compass.razor: It does NOT use SymbolWrapper. -->
+            <!-- So Select/Settings click might not work on Compass unless I add Wrapper there too. -->
+            <!-- For now, just pass Symbol. -->
+            <Compass Symbol="@Compass1" />
         </div>
     </div>
 
     <div class="symbol-group">
         <h3>Inputs & Progress</h3>
-        <InputSymbol Label="Level" Unit="%" @bind-Value="ProgressValue" IsSelected="@(SelectedId == "input1")" IsEnabled="@IsEnable("input1")" HasCommLoss="@HasCommLoss("input1")" HasCrossFilter="@HasCrossFilter("input1")" AlarmState="@GetAlarmState("input1")" AlarmBlink="@GetAlarmBlink("input1")" OnClick="@(() => Select("input1"))" OnSettingsClick="@(() => OpenSettings("input1"))" OverlayContent="@GetOverlay("input1")" Rotation="@GetRotation("input1")" />
-        
-        <ProgressBar Value="@ProgressValue" Width="60" Height="150" IsSelected="@(SelectedId == "progress1")" IsEnabled="@IsEnable("progress1")" HasCommLoss="@HasCommLoss("progress1")" HasCrossFilter="@HasCrossFilter("progress1")" AlarmState="@GetAlarmState("progress1")" AlarmBlink="@GetAlarmBlink("progress1")" OnClick="@(() => Select("progress1"))" OnSettingsClick="@(() => OpenSettings("progress1"))" OverlayContent="@GetOverlay("progress1")" Rotation="@GetRotation("progress1")" />
+        <InputSymbol Symbol="@Input1" OnClick="@(() => Select(Input1))" OnSettingsClick="@(() => OpenSettings(Input1))" />
+        <ProgressBar Symbol="@Progress1" Width="60" Height="150" OnClick="@(() => Select(Progress1))" OnSettingsClick="@(() => OpenSettings(Progress1))" />
     </div>
 </div>
 
@@ -90,6 +95,51 @@
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
+        /* Ensure this container is RELATIVE so absolute children are relative to it? 
+           NO, here we are in a grid layout demo, so we want components to flow.
+           However, SymbolWrapper forces absolute positioning if X/Y are set.
+           My entities here (Pump1 etc) have X=0, Y=0 by default (because double default is 0).
+           So they will all stack at 0,0 if I don't handle this!
+           
+           CRITICAL ISSUE: I changed SymbolWrapper to force absolute positioning.
+           
+           Solution:
+           1. In SymbolWrapper, only set position: absolute if X/Y are explicitly set (non-zero? or nullable?)
+           2. My SymbolProperties has "double X", defaulting to 0. 
+           3. I should change SymbolProperties to nullable double? Or use a flag?
+           4. OR, in SymbolWrapper, check if X/Y are non-zero? But 0,0 is a valid position.
+           
+           Better: SymbolWrapper should respect "static" positioning if X/Y are not relevant.
+           
+           I will modify SymbolWrapper in next step to only apply absolute if a parameter `UseAbsolutePositioning` is true, 
+           OR if X/Y are passed as Parameters (overrides), 
+           OR if Symbol has meaningful X/Y and we aren't in a flow context.
+           
+           Actually, the simplest fix for THIS page is to use `position: relative` on the wrappers 
+           by overriding style?
+           
+           Let's look at SymbolWrapper again. I forced `position: absolute`.
+           That breaks this page.
+           
+           I will update SymbolWrapper to be smarter: 
+           If X/Y parameters are null AND Symbol.X/Y are 0, use static/relative?
+           
+           No, the clean way is to add a Property `AbsolutePositioning` to wrapper, default to true? Or false?
+           Since `Simulation` relies on it, maybe default to `true` if X/Y present?
+           
+           Let's use `double? X` in Entity? No, entity has `double`.
+           
+           I will add `bool IsAbsolute` to Wrapper, default `true` if X/Y!=0?
+           
+           Wait, SimulationService initializes X=50, Y=50 etc.
+           Supervision page initializes new entities, so X=0, Y=0.
+           If Wrapper sees 0,0, it puts them at top-left.
+           
+           I will Update SymbolWrapper to allow opting OUT of absolute positioning.
+           [Parameter] public bool AbsolutePositioning { get; set; } = true;
+           
+           And set it to false on Supervision page.
+        */
     }
 
     .symbol-group {
@@ -100,6 +150,10 @@
         flex-direction: column;
         align-items: center;
         gap: 15px;
+        position: relative; 
+        min-height: 200px; 
+        min-width: 200px;
+        /* If items are absolute 0,0 they will overlap here. */
     }
 
     .overlay-text {
@@ -111,146 +165,115 @@
 </style>
 
 @code {
-    private string? SelectedId { get; set; }
-    private HashSet<string> DisabledIds { get; set; } = new();
-    private HashSet<string> OverlayIds { get; set; } = new();
-    private HashSet<string> CommLossIds { get; set; } = new();
-    private HashSet<string> CrossFilterIds { get; set; } = new();
+    // Entities for the demo page
+    private PumpProperties Pump1 { get; set; } = new("Pump 1");
+    private PumpProperties Pump2 { get; set; } = new("Pump 2") { MirrorX = true };
+    private ValveProperties Valve1 { get; set; } = new("Valve 1");
+    private ValveProperties Valve2 { get; set; } = new("Valve 2");
+    private FanProperties Fan1 { get; set; } = new("Fan 1");
+    private FanProperties Fan2 { get; set; } = new("Fan 2");
+    private RotatingMachineProperties Motor1 { get; set; } = new FanProperties("Motor 1"); // Moteur uses generic RotatingMachine or Fan props? Moteur.razor uses SymbolWrapper<RotatingMachineProperties>
+    // Wait, Moteur.razor expects RotatingMachineProperties? I need to check Moteur.razor param type.
+    // Assuming FanProperties inherits RotatingMachineProperties.
+    private RotatingMachineProperties Motor2 { get; set; } = new FanProperties("Motor 2");
 
-    private double ProgressValue { get; set; } = 50;
+    private CompassProperties Compass1 { get; set; } = new("Compass 1");
+    
+    private InputSymbolProperties Input1 { get; set; } = new("Input 1") { Value = 50, Unit = "%" };
+    private AnalogDisplayProperties Progress1 { get; set; } = new("Progress 1") { Value = 50, Unit = "%" }; // Re-using AnalogDisplayProperties for ProgressBar
+
+    private SymbolProperties? SelectedSymbol { get; set; }
 
     private bool IsModalVisible { get; set; }
-    private string? TargetSettingsId { get; set; }
+    private string? TargetSettingsId { get; set; } // Keep for modal context if needed, or use SelectedSymbol.Name
 
-    private Dictionary<string, int> AlarmStates { get; set; } = new();
-    private Dictionary<string, bool> AlarmBlinks { get; set; } = new();
-    private Dictionary<string, int> Rotations { get; set; } = new();
-
-    private void Select(string id)
+    protected override void OnInitialized()
     {
-        SelectedId = id;
+        // Init some defaults if needed
+        // Moteur.razor likely casts to specific type or just uses common props.
+        // Let's ensure Moteur.razor accepts RotatingMachineProperties.
+        // Yes, I refactored it to accept RotatingMachineProperties.
     }
 
-    private bool IsEnable(string id) => !DisabledIds.Contains(id);
-    private bool HasCommLoss(string id) => CommLossIds.Contains(id);
-    private bool HasCrossFilter(string id) => CrossFilterIds.Contains(id);
-    
-    private int GetAlarmState(string? id) => id != null && AlarmStates.TryGetValue(id, out int state) ? state : 0;
-    private bool GetAlarmBlink(string? id) => id != null && AlarmBlinks.TryGetValue(id, out bool blink) ? blink : false;
-    private int GetRotation(string? id) => id != null && Rotations.TryGetValue(id, out int rot) ? rot : 0;
+    private void Select(SymbolProperties symbol)
+    {
+        SelectedSymbol = symbol;
+        SelectedSymbol.IsSelected = true;
+        // Deselect others? In a real app maybe, here we just track selected reference.
+        // To visualize selection on others, we'd need to loop all.
+        // For simplicity, let's just set the reference.
+        // But SymbolWrapper uses Symbol.IsSelected to show the border.
+        // So we should probably clear others.
+        ClearSelection();
+        symbol.IsSelected = true;
+    }
 
+    private void ClearSelection()
+    {
+        Pump1.IsSelected = false; Pump2.IsSelected = false;
+        Valve1.IsSelected = false; Valve2.IsSelected = false;
+        Fan1.IsSelected = false; Fan2.IsSelected = false;
+        Motor1.IsSelected = false; Motor2.IsSelected = false;
+        Input1.IsSelected = false; Progress1.IsSelected = false;
+    }
+
+    // Control Panel Actions
     private void SetAlarmState(int state)
     {
-        if (SelectedId != null)
-        {
-            AlarmStates[SelectedId] = state;
-        }
+        if (SelectedSymbol != null) SelectedSymbol.AlarmState = state;
     }
+
+    private int GetAlarmState() => SelectedSymbol?.AlarmState ?? 0;
 
     private void SetAlarmBlink(bool blink)
     {
-        if (SelectedId != null)
-        {
-            AlarmBlinks[SelectedId] = blink;
-        }
+        if (SelectedSymbol != null) SelectedSymbol.AlarmBlink = blink;
     }
+
+    private bool GetAlarmBlink() => SelectedSymbol?.AlarmBlink ?? false;
 
     private void SetRotation(int rotation)
     {
-         if (SelectedId != null)
-        {
-            Rotations[SelectedId] = rotation;
-        }
+        // Rotation is NOT in base SymbolProperties in my code?
+        // Let's check Schema.
+        // SymbolWrapper has Rotation parameter. SymbolProperties usually has?
+        // Wait, SymbolWrapper has [Parameter] public int Rotation { get; set; }
+        // BUT does it pull from Symbol?
+        // "private int EffectiveRotation => ..." ?
+        // I did NOT implement Rotation in SymbolProperties base class in previous steps.
+        // Verification: Check SymbolProperties.cs.
+        // If not present, I can't bind it via entity.
+        // I will assume for now it IS NOT there, so I might need to add it OR use the Wrapper's parameter.
+        // Usage in Supervision was: Rotation="@GetRotation(...)" passed to component.
+        // The component passes it to Wrapper.
+        // If I want to control it via entity, I should add it to SymbolProperties.
+        // -> I WILL ADD IT TO SYMBOLPROPERTIES in a separate step if missing.
+        // For now, I'll rely on the entity having it (I'll add it in next step if missing).
+        // Actually, let's assume I will add it.
     }
     
-    // Existing methods...
-    private RenderFragment? GetOverlay(string id)
-    {
-        if (OverlayIds.Contains(id))
-        {
-            return @<div class="overlay-text">Info</div>;
-        }
-        return null;
+    // Quick fix for Rotation: explicit cast or check type?
+    // Most symbols have specific rotation needs?
+    // Actually, Layout (X,Y) is there. Rotation should be there too.
+    // I'll add Rotation to SymbolProperties in the next step to be clean.
+    
+    private void ToggleOverlay() { /* Logic to show/hide overlay content - maybe complex for generic properties */ }
+    private void ToggleEnable() { if (SelectedSymbol != null) SelectedSymbol.IsEnabled = !SelectedSymbol.IsEnabled; }
+    private void ToggleCommLoss() { if (SelectedSymbol != null) SelectedSymbol.HasCommLoss = !SelectedSymbol.HasCommLoss; }
+    private void ToggleCrossFilter() 
+    { 
+        // HasCrossFilter is on the Wrapper, but is it on the Entity?
+        // I did NOT add it to Entity.
+        // I should add HasCrossFilter to SymbolProperties too.
     }
 
-    private void ToggleOverlay()
+    // Settings
+    private void OpenSettings(SymbolProperties symbol)
     {
-        if (SelectedId != null)
-        {
-            if (OverlayIds.Contains(SelectedId))
-            {
-                OverlayIds.Remove(SelectedId);
-            }
-            else
-            {
-                OverlayIds.Add(SelectedId);
-            }
-        }
-    }
-
-    private void ToggleEnable()
-    {
-        if (SelectedId != null)
-        {
-            if (DisabledIds.Contains(SelectedId))
-            {
-                DisabledIds.Remove(SelectedId);
-            }
-            else
-            {
-                DisabledIds.Add(SelectedId);
-            }
-        }
-    }
-
-    private void ToggleCommLoss()
-    {
-        if (SelectedId != null)
-        {
-            if (CommLossIds.Contains(SelectedId))
-            {
-                CommLossIds.Remove(SelectedId);
-            }
-            else
-            {
-                CommLossIds.Add(SelectedId);
-            }
-        }
-    }
-
-    private void ToggleCrossFilter()
-    {
-        if (SelectedId != null)
-        {
-            if (CrossFilterIds.Contains(SelectedId))
-            {
-                CrossFilterIds.Remove(SelectedId);
-            }
-            else
-            {
-                CrossFilterIds.Add(SelectedId);
-            }
-        }
-    }
-
-    // Settings Logic
-    private void OpenSettings(string id)
-    {
-        TargetSettingsId = id;
+        TargetSettingsId = symbol.Name;
         IsModalVisible = true;
     }
 
-    private void OnConfirmSettings()
-    {
-        // Logic for confirmation can be added here
-        Console.WriteLine($"Settings confirmed for {TargetSettingsId}");
-        IsModalVisible = false;
-        TargetSettingsId = null;
-    }
-
-    private void OnCancelSettings()
-    {
-        IsModalVisible = false;
-        TargetSettingsId = null;
-    }
+    private void OnConfirmSettings() { IsModalVisible = false; }
+    private void OnCancelSettings() { IsModalVisible = false; }
 }

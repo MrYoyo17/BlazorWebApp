@@ -77,6 +77,7 @@
     private bool EffectiveIsSelected => Symbol?.IsSelected ?? false;
     private bool EffectiveIsEnabled => Symbol?.IsEnabled ?? true; // Default to true if no symbol
     private bool EffectiveHasCommLoss => Symbol?.HasCommLoss ?? false;
+    private bool EffectiveHasCrossFilter => Symbol?.HasCrossFilter ?? HasCrossFilter;
     private int EffectiveAlarmState => Symbol?.AlarmState ?? 0;
     private bool EffectiveAlarmBlink => Symbol?.AlarmBlink ?? false;
     
@@ -85,6 +86,10 @@
     [Parameter] public int? Width { get; set; }
     [Parameter] public int? Height { get; set; }
     [Parameter] public int Rotation { get; set; } = 0;
+    
+    // Positionnement
+    [Parameter] public double? X { get; set; }
+    [Parameter] public double? Y { get; set; }
     
     // Paramètres de symétrie
     [Parameter] public bool MirrorX { get; set; }
@@ -100,20 +105,57 @@
 
     private int ActualWidth => Width ?? Size ?? 100;
     private int ActualHeight => Height ?? Size ?? 100;
+    
+    private double? EffectiveX => Symbol?.X ?? X;
+    private double? EffectiveY => Symbol?.Y ?? Y;
+    private int EffectiveRotation => Symbol?.Rotation ?? Rotation;
+    
+    private bool EffectiveMirrorX => Symbol?.MirrorX ?? MirrorX;
+    private bool EffectiveMirrorY => Symbol?.MirrorY ?? MirrorY;
 
-    // Style Racine : Dimensions fixes
+    // Style Racine : Dimensions fixes et Position Absolue (si X/Y définis ou via Symbol)
     private string GetRootStyle()
     {
-        return $"width: {ActualWidth}px; height: {ActualHeight}px;";
+        var style = $"width: {ActualWidth}px; height: {ActualHeight}px;";
+        
+        // On force la position absolue UNIQUEMENT si X ou Y sont définis
+        if (EffectiveX.HasValue || EffectiveY.HasValue)
+        {
+            style += $" position: absolute; left: {EffectiveX ?? 0}px; top: {EffectiveY ?? 0}px;";
+        }
+        else
+        {
+             // Position relative par défaut pour le flux standard
+             style += " position: relative;";
+        }
+        
+        return style;
     }
 
     // Style Rotation : sur le conteneur interne
     private string GetRotationStyle()
     {
-        if (Rotation != 0)
+        var transform = "";
+        if (EffectiveRotation != 0)
         {
-            return $"transform: rotate({Rotation}deg); transform-origin: center;";
+            transform += $"rotate({EffectiveRotation}deg) ";
         }
+        
+        if (EffectiveMirrorX)
+        {
+            transform += "scaleX(-1) ";
+        }
+        
+        if (EffectiveMirrorY)
+        {
+            transform += "scaleY(-1) ";
+        }
+        
+        if (!string.IsNullOrEmpty(transform))
+        {
+            return $"transform: {transform}; transform-origin: center;";
+        }
+        
         return "";
     }
 
