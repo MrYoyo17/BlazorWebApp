@@ -1,6 +1,7 @@
 using TestBlazor.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using TestBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddScoped<TestBlazor.Services.ToDoService>();
 builder.Services.AddSingleton<TestBlazor.Services.CompassService>();
 builder.Services.AddSingleton<TestBlazor.Services.SimulationService>();
 builder.Services.AddScoped<TestBlazor.Services.WcfService>();
+builder.Services.AddSingleton<TestBlazor.Services.IUdpListenerService, TestBlazor.Services.UdpListenerService>(); // Registered as Singleton for continuous listening
 
 var app = builder.Build();
 

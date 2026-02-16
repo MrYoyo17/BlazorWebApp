@@ -2,7 +2,11 @@
 @using TestBlazor.Components.Symbols
 @using TestBlazor.Components.Symbols.Generics
 @using TestBlazor.Models.Symbols
+@using TestBlazor.Services
+@using TestBlazor.Models
 @rendermode InteractiveServer
+@implements IDisposable
+@inject IUdpListenerService UdpService
 
 <PageTitle>Supervision</PageTitle>
 
@@ -193,6 +197,42 @@
         // Moteur.razor likely casts to specific type or just uses common props.
         // Let's ensure Moteur.razor accepts RotatingMachineProperties.
         // Yes, I refactored it to accept RotatingMachineProperties.
+        
+        UdpService.OnDataReceived += HandleUdpData;
+        UdpService.StartListening(11000); // Default port, change as needed
+    }
+
+    private void HandleUdpData(UdpPacketData data)
+    {
+        // Map UDP data to Symbol Properties
+        // Example mapping based on placeholder structure
+        
+        // This logic will be updated once the user provides the real structure
+        // For now, let's pretend PacketId relates to something or just update randomly to show it works?
+        // Or simpler: Map specific fields if they existed.
+
+        // Let's assume user wants to drive Pump1 and Input1 for now:
+        Pump1.IsEnabled = data.Pump1Value > 0;
+        Input1.Value = data.Input1Value;
+        
+        // Optional: Update alarm based on data
+        if (data.AlarmState > 0)
+        {
+             Pump1.AlarmState = data.AlarmState;
+        }
+
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        if (UdpService != null)
+        {
+            UdpService.OnDataReceived -= HandleUdpData;
+             // Do NOT stop listening here if the service is Singleton and shared! 
+             // If unique per page, stop. But typically UDP listener is global for the app.
+             // So just unsubscribe.
+        }
     }
 
     private void Select(SymbolProperties symbol)
