@@ -21,6 +21,32 @@
     }
 </div>
 
+<div class="mt-4 p-3 border rounded bg-light">
+    <h3>Test UDP Sender (Multicast)</h3>
+    <div class="row">
+        <div class="col-md-3">
+            <label>IP (Multicast/Unicast):</label>
+            <input class="form-control" @bind="UdpIp" />
+        </div>
+        <div class="col-md-2">
+            <label>Port:</label>
+            <input type="number" class="form-control" @bind="UdpPort" />
+        </div>
+        <div class="col-md-2">
+            <label>Pump 1:</label>
+            <input type="number" class="form-control" @bind="UdpPump1" />
+        </div>
+        <div class="col-md-2">
+            <label>Pump 2:</label>
+            <input type="number" class="form-control" @bind="UdpPump2" />
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+             <button class="btn btn-warning w-100" @onclick="SendUdpPacket">Envoyer UDP</button>
+        </div>
+    </div>
+    <p class="mt-2 text-muted">@UdpStatus</p>
+</div>
+
 <div class="simulation-view-container">
     @if (MotorFan != null)
     {
@@ -140,6 +166,37 @@
         {
             WcfError = $"Erreur: {ex.Message} (Normal si pas de serveur)";
             WcfResult = "Erreur";
+        }
+    }
+
+    // UDP Sender
+    @inject IUdpSenderService UdpSenderService
+    private string UdpIp = "239.0.0.1";
+    private int UdpPort = 11000;
+    private double UdpPump1 = 50;
+    private double UdpPump2 = 50;
+    private string UdpStatus = "";
+
+    private async Task SendUdpPacket()
+    {
+        UdpStatus = "Envoi...";
+        try
+        {
+            var data = new TestBlazor.Models.UdpPacketData
+            {
+                PacketId = new Random().Next(1000),
+                Pump1Value = UdpPump1,
+                Pump2Value = UdpPump2,
+                AlarmState = 0,
+                Input1Value = 0
+            };
+            
+            await UdpSenderService.SendPacketAsync(UdpIp, UdpPort, data);
+            UdpStatus = $"Paquet envoyé à {UdpIp}:{UdpPort}";
+        }
+        catch (Exception ex)
+        {
+             UdpStatus = $"Erreur: {ex.Message}";
         }
     }
 }

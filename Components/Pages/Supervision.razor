@@ -199,7 +199,8 @@
         // Yes, I refactored it to accept RotatingMachineProperties.
         
         UdpService.OnDataReceived += HandleUdpData;
-        UdpService.StartListening(11000); // Default port, change as needed
+        UdpService.OnDataReceived += HandleUdpData;
+        UdpService.StartListening(11000, "239.0.0.1"); // Listen on port 11000 and join multicast group 239.0.0.1
     }
 
     private void HandleUdpData(UdpPacketData data)
