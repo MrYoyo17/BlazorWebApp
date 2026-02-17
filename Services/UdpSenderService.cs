@@ -19,11 +19,17 @@ public class UdpSenderService : IUdpSenderService
     /// <param name="data">The data struct to send.</param>
     public async Task SendPacketAsync(string ipAddress, int port, UdpPacketData data)
     {
-        using var client = new UdpClient();
+        // Enforce IPv4 to avoid issues with IPv6 defaults on some systems when using older multicast groups
+        using var client = new UdpClient(AddressFamily.InterNetwork);
+        
+        // Ensure TTL is sufficient for local network (default is 1, which is usually fine for local segment)
+        client.Ttl = 1;
+
+        // Serialize data before try block so it's available in catch block
+        var bytes = Serialize(data);
+
         try
         {
-            // Convert struct to raw bytes
-            var bytes = Serialize(data);
             IPEndPoint endPoint;
             
             if (IPAddress.TryParse(ipAddress, out var address))
@@ -38,12 +44,38 @@ public class UdpSenderService : IUdpSenderService
                 {
                     throw new ArgumentException($"Could not resolve IP address: {ipAddress}");
                 }
-                 endPoint = new IPEndPoint(addresses[0], port);
+                // Prefer IPv4 if available
+                var ipv4Address = addresses.FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork) ?? addresses[0];
+                endPoint = new IPEndPoint(ipv4Address, port);
             }
 
             // Send payload
             await client.SendAsync(bytes, bytes.Length, endPoint);
             Console.WriteLine($"[UDP Sender] Sent {bytes.Length} bytes to {endPoint}");
+        }
+        catch (SocketException ex) when (ex.SocketErrorCode == SocketError.HostUnreachable || ex.SocketErrorCode == SocketError.NetworkUnreachable)
+        {
+             // Specific handling for "No route to host" (HostUnreachable)
+             Console.WriteLine($"[UDP Sender] Network Unreachable: {ex.Message}. Attempting fallback bind.");
+             
+             // Retry with explicit bind to LocalHost if the previous attempt failed due to routing 
+             // (Common on macOS for Multicast without explicit route)
+             try 
+             {
+                 using var fallbackClient = new UdpClient(new IPEndPoint(IPAddress.Loopback, 0));
+                 if (IPAddress.TryParse(ipAddress, out var address))
+                 {
+                    var endPoint = new IPEndPoint(address, port);
+                    await fallbackClient.SendAsync(bytes, bytes.Length, endPoint);
+                    Console.WriteLine($"[UDP Sender] Fallback sent {bytes.Length} bytes to {endPoint} via Loopback");
+                    return;
+                 }
+             }
+             catch
+             {
+                 // invalid, throw original
+             }
+             throw;
         }
         catch (Exception ex)
         {
