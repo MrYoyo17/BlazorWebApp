@@ -1,5 +1,5 @@
 @using TestBlazor.Services
-@inject CompassService CompassService
+
 @implements IDisposable
 
 <div class="compass-container">
@@ -21,48 +21,4 @@
     <div class="compass-text">@CurrentHeading°</div>
 </div>
 
-<style>
-    .compass-container {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .compass-text {
-        position: absolute;
-        bottom: -20px;
-        font-weight: bold;
-    }
-</style>
 
-@using TestBlazor.Models.Symbols
-
-@code {
-    [Parameter] public CompassProperties? Symbol { get; set; }
-    [Parameter] public int? Heading { get; set; }
-
-    private int CurrentHeading => Symbol?.Heading ?? Heading ?? CompassService.Heading;
-
-    protected override void OnInitialized()
-    {
-        // S'abonne à l'événement de changement du service.
-        // Cela permet au composant de réagir aux mises à jour globales si le paramètre n'est pas fourni.
-        CompassService.OnChange += OnCompassChange;
-    }
-
-    public void Dispose()
-    {
-        CompassService.OnChange -= OnCompassChange;
-    }
-
-    private async void OnCompassChange()
-    {
-        // Si le Heading est fourni via paramètre, on ne force pas le refresh ici car c'est le parent qui gère
-        if (Heading.HasValue) return;
-
-        await InvokeAsync(StateHasChanged);
-    }
-}

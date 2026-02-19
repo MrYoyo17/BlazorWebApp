@@ -1,0 +1,10 @@
+.simulation-view-container {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    margin-top: 20px;
+    overflow: hidden;
+    /* avoid scrollbars if elements stick out slightly */
+}
