@@ -7,9 +7,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.22" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
     <PackageReference Include="System.ServiceModel.Http" Version="8.0.0" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Client\**" />
+    <Content Remove="Client\**" />
+    <EmbeddedResource Remove="Client\**" />
+    <None Remove="Client\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Client\Client.csproj" />
   </ItemGroup>
 
 </Project>

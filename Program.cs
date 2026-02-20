@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+    .AddInteractiveServerComponents()
+    .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddDbContext<TestBlazor.Data.ToDoDbContext>(options =>
     options.UseSqlite("Data Source=todo_archive.db"));
@@ -41,7 +42,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<TestBlazor.Components.App>()
+    .AddInteractiveServerRenderMode()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
 
 app.Run();
