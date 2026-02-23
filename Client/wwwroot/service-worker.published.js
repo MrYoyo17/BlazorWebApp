@@ -25,7 +25,21 @@ async function onInstall(event) {
     assetsRequests.push(new Request('offline1', { cache: 'no-cache' }));
     assetsRequests.push(new Request('offline2', { cache: 'no-cache' }));
 
-    await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
+    await caches.open(cacheName).then(async cache => {
+        // Cache files individually to prevent a single 404 from completely breaking the SW install
+        for (const req of assetsRequests) {
+            try {
+                const response = await fetch(req);
+                if (response.ok) {
+                    await cache.put(req, response);
+                } else {
+                    console.warn(`Service worker: Failed to cache ${req.url} (Status: ${response.status})`);
+                }
+            } catch (error) {
+                console.warn(`Service worker: Network error caching ${req.url}`, error);
+            }
+        }
+    });
 }
 
 async function onActivate(event) {
