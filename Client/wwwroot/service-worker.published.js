@@ -24,6 +24,7 @@ async function onInstall(event) {
     assetsRequests.push(new Request('/', { cache: 'no-cache' }));
     assetsRequests.push(new Request('offline1', { cache: 'no-cache' }));
     assetsRequests.push(new Request('offline2', { cache: 'no-cache' }));
+    assetsRequests.push(new Request('offline3', { cache: 'no-cache' }));
 
     await caches.open(cacheName).then(async cache => {
         // Cache files individually to prevent a single 404 from completely breaking the SW install

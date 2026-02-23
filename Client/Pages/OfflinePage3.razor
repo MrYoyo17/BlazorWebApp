@@ -1,0 +1,60 @@
+@page "/offline3"
+@using TestBlazor.Client.Services
+@inject StopwatchService Stopwatch
+@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveWebAssembly
+@implements IDisposable
+
+<div class="container mt-4">
+    <h3>Offline Page 3: Chronomètre</h3>
+
+    <div class="alert alert-info" role="alert">
+        Cette page fonctionne hors-ligne grâce au Service Worker et à WebAssembly. Le chronomètre est géré par un service injecté côté client.
+    </div>
+
+    <div class="card mt-4 shadow-sm" style="max-width: 400px;">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-stopwatch me-2"></i>Chronomètre WebAssembly</h5>
+        </div>
+        <div class="card-body text-center">
+            <h1 class="display-3 font-monospace mb-4">@Stopwatch.Elapsed.ToString("mm\\:ss\\.ff")</h1>
+            
+            <div class="d-flex justify-content-center gap-2">
+                @if (!Stopwatch.IsRunning)
+                {
+                    <button class="btn btn-primary btn-lg" @onclick="Start">
+                        <i class="bi bi-play-fill"></i> Démarrer
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-warning btn-lg" @onclick="Stop">
+                        <i class="bi bi-pause-fill"></i> Pause
+                    </button>
+                }
+                
+                <button class="btn btn-danger btn-lg" @onclick="Reset" disabled="@(Stopwatch.Elapsed.TotalMilliseconds == 0 && !Stopwatch.IsRunning)">
+                    <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <hr class="my-4">
+    <NavLink href="offline1" class="btn btn-outline-primary" data-enhance-nav="false">Aller à la page hors-ligne 1</NavLink>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Stopwatch.OnTick += StateHasChanged;
+    }
+
+    private void Start() => Stopwatch.Start();
+    private void Stop() => Stopwatch.Stop();
+    private void Reset() => Stopwatch.Reset();
+
+    public void Dispose()
+    {
+        Stopwatch.OnTick -= StateHasChanged;
+    }
+}

@@ -19,6 +19,7 @@ builder.Services.AddSingleton<TestBlazor.Services.SimulationService>();
 builder.Services.AddScoped<TestBlazor.Services.WcfService>();
 builder.Services.AddSingleton<TestBlazor.Services.IUdpListenerService, TestBlazor.Services.UdpListenerService>(); // Registered as Singleton for continuous listening
 builder.Services.AddTransient<TestBlazor.Services.IUdpSenderService, TestBlazor.Services.UdpSenderService>();
+builder.Services.AddSingleton<TestBlazor.Client.Services.StopwatchService>();
 
 var app = builder.Build();
 
