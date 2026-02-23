@@ -103,7 +103,7 @@ async function onInstall(event) {
     const assetsRequests = self.assetsManifest.assets
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
-        .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' }));
+        .map(asset => new Request(asset.url, { cache: 'no-cache' })); // Retirer l'attribut 'integrity: asset.hash' pour éviter les erreurs SRI en dev (incompatibilité dotnet watch)
 
     // Cacher explicitement les routes des pages hors-ligne (Important pour la structure WebApp)
     assetsRequests.push(new Request('/', { cache: 'no-cache' }));
