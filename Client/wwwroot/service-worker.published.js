@@ -19,6 +19,12 @@ async function onInstall(event) {
         .filter(asset => offlineAssetsInclude.some(pattern => pattern.test(asset.url)))
         .filter(asset => !offlineAssetsExclude.some(pattern => pattern.test(asset.url)))
         .map(asset => new Request(asset.url, { integrity: asset.hash, cache: 'no-cache' }));
+
+    // Explicitly cache navigation routes needed to boot the app offline
+    assetsRequests.push(new Request('/', { cache: 'no-cache' }));
+    assetsRequests.push(new Request('offline1', { cache: 'no-cache' }));
+    assetsRequests.push(new Request('offline2', { cache: 'no-cache' }));
+
     await caches.open(cacheName).then(cache => cache.addAll(assetsRequests));
 }
 
@@ -30,23 +36,38 @@ async function onActivate(event) {
     await Promise.all(cacheKeys
         .filter(key => key.startsWith(cacheNamePrefix) && key !== cacheName)
         .map(key => caches.delete(key)));
+
+    // Take control of uncontrolled clients immediately
+    await self.clients.claim();
 }
 
 async function onFetch(event) {
     let cachedResponse = null;
-    if (event.request.method === 'GET') {
-        // For all navigation requests, try to serve index.html from cache
-        // If you need some URLs to be server-rendered (i.e. default to online), then you can check the URL here and modify this behavior.
-        // For offline support, we want to serve index.html.
-        // HOWEVER, in a Blazor Web App (server + client), 'index.html' isn't really the root if we're connected.
-        // But for offline, we must serve something that boots the Client app.
-        // In .NET 8, the service worker usually doesn't cache index.html the same way if it's dynamic.
-        // But let's assume we want basic offline support for the Client part.
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            (async () => {
+                try {
+                    // Try to fetch from the network first to always get the latest HTML
+                    const networkResponse = await fetch(event.request);
+                    return networkResponse;
+                } catch (error) {
+                    console.info('Service worker: Network failed, serving offline route fallback');
+                    // If network fails (offline), look for cached route exactly
+                    const cache = await caches.open(cacheName);
+                    cachedResponse = await cache.match(event.request);
+                    if (cachedResponse) return cachedResponse;
 
-        const shouldServeIndexHtml = event.request.mode === 'navigate';
-        const request = shouldServeIndexHtml ? 'index.html' : event.request;
+                    // Fallback to the root if specific route not found in cache
+                    return await cache.match('/');
+                }
+            })()
+        );
+        return;
+    }
+
+    if (event.request.method === 'GET') {
         const cache = await caches.open(cacheName);
-        cachedResponse = await cache.match(request);
+        cachedResponse = await cache.match(event.request);
     }
 
     return cachedResponse || fetch(event.request);

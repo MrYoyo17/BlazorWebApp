@@ -36,6 +36,10 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+else
+{
+    app.UseWebAssemblyDebugging();
+}
 
 app.UseHttpsRedirection();
 
@@ -46,5 +50,25 @@ app.MapRazorComponents<TestBlazor.Components.App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
+
+// Serve the service worker manifest manually in development if necessary
+app.MapGet("/service-worker-assets.js", async context =>
+{
+    var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
+    var filePath = Path.Combine(env.ContentRootPath, "Client", "obj", "Debug", "net8.0", "service-worker-assets.js");
+    
+    // In publish, MapStaticAssets or UseStaticFiles handles this automatically.
+    // In dev, the obj folder contains the generated manifest.
+    if (File.Exists(filePath))
+    {
+        context.Response.ContentType = "application/javascript";
+        await context.Response.SendFileAsync(filePath);
+        return;
+    }
+    
+    // Default empty fallback
+    context.Response.ContentType = "application/javascript";
+    await context.Response.WriteAsync("self.assetsManifest = { assets: [], version: '1' };");
+});
 
 app.Run();

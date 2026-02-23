@@ -1,3 +1,3 @@
-// In development, always fetch from the network and do not enable offline support.
-// This is because caching would make development dangerous (seeing old files instead of new edits).
-self.addEventListener('fetch', () => { });
+// In development, normally we don't cache to allow live reloading.
+// But to test offline mode, we will import the published worker logic.
+self.importScripts('./service-worker.published.js');

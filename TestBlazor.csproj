@@ -13,6 +13,8 @@
     <PackageReference Include="System.ServiceModel.Primitives" Version="8.0.0" />
   </ItemGroup>
 
+
+
   <ItemGroup>
     <Compile Remove="Client\**" />
     <Content Remove="Client\**" />

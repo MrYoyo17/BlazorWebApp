@@ -1,13 +1,129 @@
 @page "/offline1"
 @rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveWebAssembly
 
-<h3>Offline Page 1</h3>
+<div class="container mt-4">
+    <h3>Offline Page 1</h3>
 
-<p>This page is rendered using WebAssembly and should work offline.</p>
+    <div class="alert alert-info" role="alert">
+        <h4 class="alert-heading">Comment fonctionne le mode hors-ligne ?</h4>
+        <p>Cette application Blazor Web App utilise un <strong>Service Worker</strong> pour mettre en cache les ressources de l'application (HTML, CSS, JavaScript, et les assemblages WebAssembly .dll).</p>
+        <hr>
+        <p class="mb-0">
+            <ul>
+                <li>Lors de votre première visite, le Service Worker télécharge et stocke ces fichiers dans le cache de votre navigateur.</li>
+                <li>Lorsque vous perdez la connexion Internet (ou que vous simulez une coupure réseau), le Service Worker intercepte les requêtes de navigation.</li>
+                <li>Au lieu d'échouer, il sert les fichiers depuis le cache local, permettant à l'application de démarrer et de fonctionner de manière autonome sans serveur.</li>
+                <li>Cette page utilise le mode de rendu <code>InteractiveWebAssembly</code>, ce qui signifie que son code C# est exécuté directement dans votre navigateur via WebAssembly, sans nécessiter de connexion au serveur (SignalR).</li>
+            </ul>
+        </p>
+        <hr>
+        <NavLink href="offline2" class="btn btn-outline-primary" data-enhance-nav="false">Aller à la page hors-ligne 2</NavLink>
+    </div>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">Status</h5>
-        <p class="card-text">If you are offline, this content is served from the cache.</p>
+    <!-- Calculator UI -->
+    <div class="card mt-4 shadow-sm" style="max-width: 400px;">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Calculette WebAssembly</h5>
+        </div>
+        <div class="card-body">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control text-end fs-4 font-monospace" value="@_display" readonly style="background-color: #f8f9fa;" />
+            </div>
+
+            <div class="row g-2 mb-2">
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(7)">7</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(8)">8</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(9)">9</button></div>
+                <div class="col-3"><button class="btn btn-warning w-100 fs-5 shadow-sm text-dark font-weight-bold" @onclick="@(() => SetOperator("/"))">/</button></div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(4)">4</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(5)">5</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(6)">6</button></div>
+                <div class="col-3"><button class="btn btn-warning w-100 fs-5 shadow-sm text-dark font-weight-bold" @onclick="@(() => SetOperator("*"))">*</button></div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(1)">1</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(2)">2</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(3)">3</button></div>
+                <div class="col-3"><button class="btn btn-warning w-100 fs-5 shadow-sm text-dark font-weight-bold" @onclick="@(() => SetOperator("-"))">-</button></div>
+            </div>
+            <div class="row g-2">
+                <div class="col-3"><button class="btn btn-danger w-100 fs-5 shadow-sm" @onclick="Clear">C</button></div>
+                <div class="col-3"><button class="btn btn-outline-secondary w-100 fs-5 shadow-sm" @onclick="() => AppendDigit(0)">0</button></div>
+                <div class="col-3"><button class="btn btn-success w-100 fs-5 shadow-sm" @onclick="Calculate">=</button></div>
+                <div class="col-3"><button class="btn btn-warning w-100 fs-5 shadow-sm text-dark font-weight-bold" @onclick="@(() => SetOperator("+"))">+</button></div>
+            </div>
+        </div>
     </div>
 </div>
+
+@code {
+    private string _display = "0";
+    private double _firstOperand = 0;
+    private string _operator = "";
+    private bool _isNewEntry = true;
+
+    private void AppendDigit(int digit)
+    {
+        if (_isNewEntry)
+        {
+            _display = digit.ToString();
+            _isNewEntry = false;
+        }
+        else
+        {
+            if (_display == "0")
+            {
+                _display = digit.ToString();
+            }
+            else
+            {
+                _display += digit;
+            }
+        }
+    }
+
+    private void SetOperator(string op)
+    {
+        if (double.TryParse(_display, out double current))
+        {
+            if (!_isNewEntry && !string.IsNullOrEmpty(_operator))
+            {
+                Calculate();
+            }
+            _firstOperand = double.Parse(_display);
+            _operator = op;
+            _isNewEntry = true;
+        }
+    }
+
+    private void Calculate()
+    {
+        if (double.TryParse(_display, out double secondOperand) && !string.IsNullOrEmpty(_operator))
+        {
+            double result = 0;
+            switch (_operator)
+            {
+                case "+": result = _firstOperand + secondOperand; break;
+                case "-": result = _firstOperand - secondOperand; break;
+                case "*": result = _firstOperand * secondOperand; break;
+                case "/": 
+                    if (secondOperand != 0) result = _firstOperand / secondOperand; 
+                    else { _display = "Error"; _isNewEntry = true; _operator = ""; return; }
+                    break;
+            }
+            _display = result.ToString();
+            _isNewEntry = true;
+            _operator = "";
+        }
+    }
+
+    private void Clear()
+    {
+        _display = "0";
+        _firstOperand = 0;
+        _operator = "";
+        _isNewEntry = true;
+    }
+}
