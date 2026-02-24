@@ -1,5 +1,7 @@
 @page "/offline1"
 @rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveWebAssembly
+@implements IDisposable
+@inject TestBlazor.Client.Services.CounterService CounterService
 
 <div class="container mt-4">
     <h3>Offline Page 1</h3>
@@ -56,6 +58,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Shared Counter UI -->
+    <div class="card mt-4 shadow-sm" style="max-width: 400px;">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Compteur Partagé</h5>
+        </div>
+        <div class="card-body text-center">
+            <p class="fs-4">Valeur du compteur : <strong>@CounterService.Count</strong></p>
+            <button class="btn btn-primary" @onclick="CounterService.IncrementCountAsync">
+                Incrémenter le compteur
+            </button>
+        </div>
+    </div>
 </div>
 
 @code {
@@ -63,6 +78,25 @@
     private double _firstOperand = 0;
     private string _operator = "";
     private bool _isNewEntry = true;
+
+    protected override void OnInitialized()
+    {
+        CounterService.OnCountChanged += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CounterService.InitializeAsync();
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        CounterService.OnCountChanged -= StateHasChanged;
+    }
 
     private void AppendDigit(int digit)
     {

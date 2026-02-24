@@ -3,7 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TestBlazor.Services;
 
+using Blazored.LocalStorage;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddBlazoredLocalStorage();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -20,6 +23,7 @@ builder.Services.AddScoped<TestBlazor.Services.WcfService>();
 builder.Services.AddSingleton<TestBlazor.Services.IUdpListenerService, TestBlazor.Services.UdpListenerService>(); // Registered as Singleton for continuous listening
 builder.Services.AddTransient<TestBlazor.Services.IUdpSenderService, TestBlazor.Services.UdpSenderService>();
 builder.Services.AddSingleton<TestBlazor.Client.Services.StopwatchService>();
+builder.Services.AddScoped<TestBlazor.Client.Services.CounterService>();
 
 var app = builder.Build();
 

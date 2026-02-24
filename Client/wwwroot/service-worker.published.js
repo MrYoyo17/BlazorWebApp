@@ -26,6 +26,9 @@ async function onInstall(event) {
     assetsRequests.push(new Request('offline2', { cache: 'no-cache' }));
     assetsRequests.push(new Request('offline3', { cache: 'no-cache' }));
 
+    // Add Blazor Server/Web App boot scripts since they might not be in the wasm manifest
+    assetsRequests.push(new Request('_framework/blazor.web.js', { cache: 'no-cache' }));
+
     await caches.open(cacheName).then(async cache => {
         // Cache files individually to prevent a single 404 from completely breaking the SW install
         for (const req of assetsRequests) {
@@ -85,5 +88,15 @@ async function onFetch(event) {
         cachedResponse = await cache.match(event.request);
     }
 
-    return cachedResponse || fetch(event.request);
+    if (cachedResponse) {
+        return cachedResponse;
+    }
+
+    try {
+        return await fetch(event.request);
+    } catch (error) {
+        console.error("Fichier introuvable en cache et réseau coupé : ", event.request.url);
+        // On laisse l'erreur remonter proprement au lieu de faire planter le Service Worker
+        throw error;
+    }
 }
